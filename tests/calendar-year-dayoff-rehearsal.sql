@@ -10,12 +10,17 @@ select set_config('request.headers','{"x-sgf-role":"administrador","x-sgf-actor"
 set local role service_role;
 select public.prepare_rh_unit('f6000000-0000-0000-0000-000000000001','f6000000-0000-0000-0000-000000000100','RH TESTE');
 reset role;
-insert into auth.users(id,email,aud,role,raw_app_meta_data)
-select auth_user_id,internal_email,'authenticated','authenticated','{"sgf_rh_cnes":"9999994"}'::jsonb from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100';
+insert into auth.users(id,email,aud,role,raw_app_meta_data,encrypted_password)
+select auth_user_id,internal_email,'authenticated','authenticated','{"sgf_rh_cnes":"9999994"}'::jsonb, extensions.crypt('Fixture-RH-Provisoria', extensions.gen_salt('bf',4)) from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100';
 set local role service_role;
 select public.finish_rh_unit('f6000000-0000-0000-0000-000000000001','f6000000-0000-0000-0000-000000000100',(select auth_user_id from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100'));
 reset role;
 insert into auth.sessions(id,user_id) select 'f6000000-0000-0000-0000-000000000200',profile_id from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100';
+-- O primeiro acesso da conta fictícia conclui a troca antes dos ensaios de RH.
+set local role service_role;
+select public.rh_complete_provisional_password(profile_id,'f6000000-0000-0000-0000-000000000200','Fixture-RH-Definitiva')
+from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100';
+reset role;
 insert into auth.sessions(id,user_id) select 'f6000000-0000-0000-0000-000000000201',profile_id from private.rh_unit_accounts where cnes_unit_id='f6000000-0000-0000-0000-000000000100';
 insert into public.cnes_units(id,code,name) values('f6000000-0000-0000-0000-000000000102','9999993','OUTRO CNES TESTE');
 insert into private.cnes_registry_entries(id,cnes_unit_id,source_id,source_hash,source_data)
