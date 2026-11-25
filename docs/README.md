@@ -11,6 +11,7 @@ A documentação atual descreve o fluxo da Administração e do RH institucional
 | Conferir os procedimentos de lançamento | [Operações atuais](GUIA_OPERACOES_FINAIS.md) |
 | Desenvolver e testar sem afetar produção | [Desenvolvimento](DESENVOLVIMENTO.md) |
 | Entender os componentes e a autorização | [Arquitetura](ARQUITETURA.md) |
+| Implantar a distribuição PostgreSQL | [Implantação integrada](../local/IMPLANTACAO.md) |
 | Publicar e manter | [Publicação](PUBLICACAO.md), [Hospedagem](HOSPEDAGEM.md), [Operação](OPERACAO.md) |
 | Tratar evidências e dados pessoais | [Privacidade](PRIVACIDADE.md), [Segurança](../SECURITY.md) |
 | Validar o uso institucional | [Homologação](GUIA_HOMOLOGACAO.md) |

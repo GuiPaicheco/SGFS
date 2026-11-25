@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { inspectPublicFile } from '../scripts/public-repository-policy.mjs';
 
 test('bloqueia arquivos privados, mas permite modelo e migrations', () => {
-  for (const name of ['.env', '.env.local', '.sgf-backups/snapshot.json', '.vscode/mcp.json', 'output/export.xlsx', 'db.dump', 'secret.pem']) {
+  for (const name of ['.env', '.env.local', '.sgf-backups/snapshot.json', '.vscode/mcp.json', 'output/export.xlsx', 'dist-municipal/assets/app.js', 'db.dump', 'secret.pem']) {
     assert.ok(inspectPublicFile(name).length, name);
   }
   for (const name of ['.env.example', 'supabase/migrations/20260101000000_initial.sql', 'docs/README.md']) {

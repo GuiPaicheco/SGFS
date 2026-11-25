@@ -57,7 +57,23 @@
    }draw();if(current())root.SGFRhFocus?.message(app);
   }catch(e){error=e.message;if(resources&&editing&&!['regulamentar','premio'].includes(editing.plan.type))resources=null;draw();if(current())root.SGFRhFocus?.message(app);}
  }
- async function detail({app,esc,request,isCurrent,cnes,leaveId,onBack}){
+ const recordType=type=>({regulamentar:'Férias',premio:'Férias-prêmio',folga:'Folga',dayoff:'Day-off',afastamento:'Afastamento',banco_horas:'Banco de horas'})[type]||type;
+ const recordStatus=status=>({programada:'Programado',cancelada:'Cancelado',concluida:'Concluído',reprogramada:'Reprogramado',rejeitada:'Rejeitado'})[status]||status;
+ async function detail({app,esc,request,isCurrent,cnes,leaveId,onBack,origin}){
+  if(origin==='legado'){
+   app.innerHTML='<section class="card"><h2>Registro de afastamento</h2><p role="status">Carregando…</p><button type="button" id="rh-detail-back">Voltar</button></section>';
+   let active=true;
+   const setupBack=()=>{app.querySelector('#rh-detail-back').onclick=()=>{active=false;onBack();};};
+   setupBack();
+   try{
+    const record=await request({action:'legacy-detail',leaveId,...(cnes?{cnes}:{})});
+    if(!active||!isCurrent())return;
+    app.innerHTML=`<section class="card"><h2>Registro de afastamento</h2><p>${esc(record.full_name||'')}</p><p>${esc(record.protocol||record.id)} · ${esc(recordType(record.type))} · ${esc(recordStatus(record.status))}</p>
+    <ul>${(record.periods||[]).map(x=>`<li>${esc(x.start_date)} a ${esc(x.end_date||'sem previsão')}${x.return_date?' · Retorno: '+esc(x.return_date):''}</li>`).join('')}</ul><button type="button" id="rh-detail-back">Voltar</button></section>`;
+    setupBack();
+   }catch(error){if(active&&isCurrent())app.querySelector('[role=status]').textContent=error.message;}
+   return;
+  }
   let active=true;const current=()=>active&&isCurrent();const back=(...args)=>{active=false;onBack(...args);};
   let data=null,busy=false,error='',closeDraft={status:'cancelada',reason:''};
   const call=payload=>request({...payload,...(cnes?{cnes}:{})});
@@ -77,5 +93,5 @@
   }
   draw();try{data=await call({action:'leave-detail',leaveId});draw();if(current())root.SGFRhFocus?.message(app);}catch(e){error=e.message;draw();if(current())root.SGFRhFocus?.message(app);}
  }
- root.SGFRhLeave={open,detail};
+ root.SGFRhLeave={recordType,recordStatus,open,detail};
 })(globalThis);

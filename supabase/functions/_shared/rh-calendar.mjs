@@ -1,6 +1,6 @@
-export function calendarQuery(payload) {
+export function calendarQuery(payload,maxPage=100) {
  if(typeof payload.month!=='string'||! /^(19\d{2}|20\d{2}|2100)-(0[1-9]|1[0-2])$/.test(payload.month)
-  ||!Number.isInteger(payload.page)||payload.page<0||payload.page>100
+  ||!Number.isInteger(payload.page)||payload.page<0||payload.page>maxPage
   ||typeof payload.search!=='string'||payload.search.length>120)throw Error('RH_INPUT_INVALID');
  const filters=payload.filters??{};if(!filters||typeof filters!=='object'||Array.isArray(filters))throw Error('RH_INPUT_INVALID');
  const allowed={position:null,cbo:null,team:null,review:['todos','pendente','conferido'],type:['todos','regulamentar','premio','banco_horas','folga','dayoff','afastamento'],status:['todos','com_afastamento','sem_afastamento','programada','concluida','cancelada']};
@@ -26,14 +26,17 @@ export function bindingInput(payload) {
 }
 
 export function calendarWindow(payload){
- const base=calendarQuery({...payload,month:payload.month||String(payload.start||'').slice(0,7)});
+ const base=calendarQuery({...payload,month:payload.month||String(payload.start||'').slice(0,7)},payload.pageSize===undefined?100:10000);
  const valid=value=>typeof value==='string'&&/^(19\d{2}|20\d{2}|2100)-\d{2}-\d{2}$/.test(value)&&!isNaN(Date.parse(value+'T12:00:00Z'))&&new Date(value+'T12:00:00Z').toISOString().slice(0,10)===value;
  let start,end;
  if(payload.mode==='range'){start=payload.start;end=payload.end;}
  else {start=base.target_month;const d=new Date(start+'T12:00:00Z');d.setUTCMonth(d.getUTCMonth()+1);d.setUTCDate(0);end=d.toISOString().slice(0,10);}
  const anniversary=new Date(start+'T12:00:00Z');if(valid(start)){const year=anniversary.getUTCFullYear()+1,month=anniversary.getUTCMonth(),date=anniversary.getUTCDate();anniversary.setUTCFullYear(year,month,1);anniversary.setUTCDate(Math.min(date,new Date(Date.UTC(year,month+1,0)).getUTCDate()));}
  if(!valid(start)||!valid(end)||end<start||Date.parse(end+'T12:00:00Z')>=anniversary.valueOf())throw Error('RH_INPUT_INVALID');
- return {range_start:start,range_end:end,page_index:base.page_index,search_text:base.search_text,filter_json:base.filter_json};
+ const pageSize=payload.pageSize;
+ if(pageSize!==undefined&&![10,20,30,50,80,130].includes(pageSize))throw Error('RH_INPUT_INVALID');
+ return {range_start:start,range_end:end,page_index:base.page_index,search_text:base.search_text,
+  filter_json:pageSize===undefined?base.filter_json:{...base.filter_json,page_size:pageSize}};
 }
 
 export function birthdayInput(payload){

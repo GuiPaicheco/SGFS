@@ -21,3 +21,5 @@ tmp/
 *.key
 *.dump
 *.backup
+
+/dist-municipal/

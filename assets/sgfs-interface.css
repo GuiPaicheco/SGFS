@@ -193,3 +193,29 @@
   .rh-calendar-card>form>.actions { display:grid; grid-template-columns:1fr 1fr; }
 }
 @media (prefers-reduced-motion:reduce) { .choice,.button { transition:none; } }
+
+/* O calendário mantém todas as datas do mês à vista em telas largas. */
+.rh-calendar-card .rh-calendar-wrap {max-height:none;container-type:inline-size;}
+.rh-calendar-card .rh-calendar {width:max-content;--month-days:31;--day-width:clamp(24px,calc((100cqw - 380px) / var(--month-days)),42px);}
+.rh-calendar-card .rh-calendar[data-month-days="28"] {--month-days:28;}
+.rh-calendar-card .rh-calendar[data-month-days="29"] {--month-days:29;}
+.rh-calendar-card .rh-calendar[data-month-days="30"] {--month-days:30;}
+.rh-calendar-card .rh-calendar .rh-day {box-sizing:border-box;width:var(--day-width);min-width:var(--day-width);padding-inline:2px;}
+.rh-calendar-card .rh-calendar .rh-person-col {min-width:48px;max-width:90px;overflow-wrap:anywhere;}
+.rh-calendar-card .rh-calendar .rh-col-full_name {min-width:110px;max-width:130px;}
+.rh-calendar .rh-day-record {width:100%;min-height:24px;padding:0;background:transparent;border:0;color:inherit;font:inherit;text-decoration:underline;cursor:pointer;}
+.rh-calendar .rh-day-record:focus-visible {outline:2px solid currentColor;outline-offset:1px;}
+#rh-calendar-more {min-height:1px;}
+
+.sgfs-info-dialog {color:var(--text,#163327);width:min(92vw,42rem);max-height:85vh;overflow:auto;border:1px solid #b5cdc0;border-radius:14px;padding:clamp(1rem,4vw,2rem);}
+.sgfs-info-dialog::backdrop {background:rgba(11,39,31,.62);}
+.sgfs-info-dialog details {margin-block:.75rem;}
+.sgfs-info-dialog .actions {margin-top:1rem;}
+.sgfs-footer-links {display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;padding:.75rem;}
+
+.rh-calendar-card .rh-calendar tbody td:first-child:not(.rh-col-full_name) {position:static;}
+.rh-calendar-card .rh-calendar thead th:first-child:not(.rh-col-full_name) {left:auto;}
+.rh-calendar-card .rh-calendar tbody .rh-col-full_name {position:sticky;left:0;z-index:2;background:white;}
+.rh-calendar-card .rh-calendar thead .rh-col-full_name {left:0;z-index:4;}
+
+.rh-calendar-card .rh-calendar .rh-day {overflow-wrap:anywhere;white-space:normal;}

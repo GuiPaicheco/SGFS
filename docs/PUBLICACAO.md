@@ -14,9 +14,8 @@ Não publicar arquivos locais `.env`, `.vscode/`, `.vercel/`, backups ou saídas
 
 Quando houver alteração de backend, aplique migrations revisadas e publique funções compatíveis no ambiente autorizado antes da interface. Não reaplique migrations já registradas nem use reset para atualizar uma base em uso.
 
-O push em `main` aciona a integração de publicação configurada. Confira tanto o CI do GitHub quanto o deploy Vercel. Os processos são independentes; um deploy pronto não prova aprovação dos ensaios de banco.
+O push em main executa o CI. Para implantar o SGFS, siga o [guia PostgreSQL](../local/IMPLANTACAO.md) e atualize o gateway e as funções junto com a interface. Confira separadamente os resultados do CI e o estado do serviço implantado.
 
-O frontend é construído em `dist/`; a função Python é empacotada pela Vercel. Veja [HOSPEDAGEM.md](HOSPEDAGEM.md).
 
 ## Depois de publicar
 

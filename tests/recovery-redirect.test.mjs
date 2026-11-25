@@ -18,3 +18,10 @@ test('retorno adicional depende de configuração explícita no servidor',()=>{
   assert.throws(()=>redirect('http://localhost:8080/'));
   assert.equal(redirect('http://localhost:8080/','http://localhost:8080/'),'http://localhost:8080/');
 });
+
+test('instalação municipal limita a recuperação à própria URL',()=>{
+  const local = 'http://127.0.0.1:8089/SGFS/';
+  assert.equal(redirect(undefined, '', local), local);
+  assert.equal(redirect(local, '', local), local);
+  assert.throws(()=>redirect('https://sgfbetim.vercel.app/', '', local),/RECOVERY_REDIRECT_INVALID/);
+});

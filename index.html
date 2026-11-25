@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#123c2f">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data:; connect-src 'self' https://ijhvbzomakbbxverqfqh.supabase.co wss://ijhvbzomakbbxverqfqh.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>SGFS — Sistema de Gestão de Funcionários da Saúde | Prefeitura de Betim</title>
   <link rel="icon" href="logo.png">
   <link rel="stylesheet" href="assets/app.css?v=20261014-block8-3">
@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="assets/final-ui.css?v=20261023-1">
   <link rel="stylesheet" href="assets/scale.css?v=20261009-block4-1">
   <link rel="stylesheet" href="assets/receipt.css?v=20261014-block8-3">
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
+  <script defer src="assets/vendor/supabase.min.js"></script>
   <script defer src="assets/scale-conflicts.js?v=20261014-audit-1"></script>
   <script defer src="assets/scale-range.js?v=20261009-block7-1"></script>
   <script defer src="assets/access-policy.js?v=20261017-calendar-1"></script>
@@ -39,6 +39,8 @@
   <script defer src="assets/rh-calendar-ui.js?v=20261018-1"></script>
   <script defer src="assets/rh-accounts-ui.js?v=20261017-2"></script>
   <link rel="stylesheet" href="assets/sgfs-interface.css?v=20261023-1">
+  <script defer src="assets/sgfs-releases.js"></script>
+  <script defer src="assets/sgfs-legal.js"></script>
   <script defer src="assets/app.js?v=20261017-calendar-2"></script>
 </head>
 
@@ -54,9 +56,6 @@
       <button id="session-action" class="button button-ghost hidden" type="button">Sair</button>
     </div>
   </header>
-  <aside class="notice notice-warning" id="sgfs-maintenance" aria-label="Aviso de manutenção">
-    Prezados, estamos passando por manutenções e pedimos que nenhum dado seja salvo no sistema no momento ou esse dado ira ser perdido. <strong>Novo acesso em breve em http://tecnologia/sgfs/</strong>...
-  </aside>
   <div id="progress" class="progress" aria-live="polite"></div>
   <nav id="workspace-nav" class="workspace-nav hidden" aria-label="Navegação do SGFS"></nav>
   <main id="app" class="app" tabindex="-1">
@@ -65,7 +64,7 @@
       <p>Preparando o sistema…</p>
     </section>
   </main>
-  <footer class="site-footer"><div class="footer-inner"><span class="footer-mark" aria-hidden="true">SGFS</span><div class="footer-copy"><strong>Diretoria IV de Atenção Primária à Saúde</strong><span>Prefeitura Municipal de Betim</span></div></div></footer>
+  <footer class="site-footer"><div class="footer-inner"><span class="footer-mark" aria-hidden="true">SGFS</span><div class="footer-copy"><strong>Diretoria IV de Atenção Primária à Saúde</strong><span>Prefeitura Municipal de Betim</span></div></div><div class="sgfs-footer-links"><button type="button" class="text-button" id="sgfs-documents">Termos e privacidade</button><button type="button" class="text-button" id="sgfs-versions">Histórico de versões</button></div></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 

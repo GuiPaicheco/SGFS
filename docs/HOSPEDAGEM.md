@@ -1,34 +1,15 @@
 # Hospedagem do SGFS
 
-## Vercel
+## Distribuição PostgreSQL
 
-O destino atual é Vercel, projeto `sgfbetim`, branch `main`. O endereço institucional é [sgfbetim.vercel.app](https://sgfbetim.vercel.app/).
+Execute o gateway Node.js atrás do proxy HTTPS institucional. O gateway serve a interface e encaminha as chamadas de sessão, banco, funções de aplicação e CNES. Use PostgreSQL dedicado à aplicação e mantenha Auth, PostgREST, Deno e Uvicorn acessíveis apenas em loopback. Consulte [implantação integrada](../local/IMPLANTACAO.md).
 
-`vercel.json` configura:
+A geração da interface não provisiona contas nem modifica o banco. Aplique as migrações no ambiente autorizado e confira as políticas RLS antes de abrir o serviço.
 
-- Build: `node scripts/build-static.mjs`.
-- Saída estática: `dist/`.
-- Função Python: `api/cnes.py`, incluindo `cnes_service/` e `config/rh-units.json`.
-- Cabeçalhos de segurança, CSP e cache.
+## Instalação anterior
 
-A função Python é empacotada separadamente; publicar apenas `dist/` em um servidor estático não disponibiliza `/api/cnes`.
-
-Use a configuração de ambiente da plataforma para o backend Python. Ao definir outro Supabase, ajuste também frontend, CSP e URLs do Auth; consulte [DESENVOLVIMENTO.md](DESENVOLVIMENTO.md). Não exponha segredos em variáveis públicas.
-
-## Supabase
-
-Banco, Auth e Edge Functions são implantados separadamente da interface. O deploy Vercel não aplica migrations, não provisiona contas e não configura URLs de recuperação.
-
-A chave publicável fica no cliente; chaves privilegiadas pertencem ao servidor. Os dados privados dependem das políticas RLS e das validações das funções, não do sigilo da URL do projeto.
-
-## Netlify
-
-`netlify.toml` permanece como alternativa de publicação estática. Usa o mesmo build e diretório de saída, mas não executa a função Python Vercel. Para oferecer a consulta CNES nessa hospedagem, seria necessário um backend compatível e uma integração própria; não declarar equivalência funcional automática.
+O site anterior da Vercel exibe o aviso de manutenção. A configuração da distribuição integrada desativa o deploy automático da branch `main` na Vercel e o build de produção na Netlify. A configuração anterior e o aviso estão registrados no commit `0fa84f6`.
 
 ## Conferência após publicação
 
-Confirme commit e estado do deploy; abra início, login e simulação. Faça leitura autenticada autorizada para conferir o calendário e a unidade. Verifique responsividade, console e exportações quando afetadas.
-
-Documentos, backups, migrations, configurações de editor e arquivos de ambiente não pertencem ao diretório servido. Não teste indisponibilidade criando dados, apagando registros ou redefinindo senhas reais.
-
-Veja [PUBLICACAO.md](PUBLICACAO.md) para a sequência de atualização e recuperação.
+Confirme a versão e a disponibilidade do gateway. Valide login, recuperação, isolamento por unidade, calendário e exportações com contas autorizadas e dados fictícios. Consulte [publicação](PUBLICACAO.md).

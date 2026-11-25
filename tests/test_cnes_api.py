@@ -44,7 +44,7 @@ class CnesTests(unittest.TestCase):
                     return httpx.Response(200,json={'id':'f0000000-0000-0000-0000-000000000001'})
                 return httpx.Response(200,json=[{'roles':[role],'disabled_at':None,'must_change_password':False,'institutional_cnes_unit_id':None}])
             collect=AsyncMock(return_value={'metadados':{'completo_no_escopo_solicitado':True}})
-            with patch('api.cnes.httpx.AsyncClient',lambda **kw:original(transport=httpx.MockTransport(respond),**kw)),patch('api.cnes.collect_unit',collect):
+            with patch('api.cnes.SUPABASE', 'http://backend.invalid'), patch('api.cnes.httpx.AsyncClient',lambda **kw:original(transport=httpx.MockTransport(respond),**kw)),patch('api.cnes.collect_unit',collect):
                 with TestClient(app) as client:
                     response=client.get('/api/cnes?cnes=6305245',headers={'Authorization':'Bearer FICTICIO','apikey':'PUBLICA-FICTICIA'})
                 self.assertEqual(response.status_code,expected)

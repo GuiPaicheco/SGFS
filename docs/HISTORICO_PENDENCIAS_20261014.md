@@ -92,7 +92,7 @@ Decisão do responsável em 14/10/2026: o sistema continuará recebendo mudança
 4. [ ] Ratificar política de retenção, responsáveis e eventual anonimização, conforme AUDITORIA_RETENCAO.md. Nenhum prazo legal ou descarte foi definido pelo sistema.
 5. [ ] Registrar evidências e aceite nominal da versão final; ensaios técnicos não substituem a aprovação institucional.
 
-Entrega adicional de 09/10: ciclo moderno real com conta nova fictícia, quatro perfis, duas matrículas e dois CNES; aprovações e inclusões independentes, débito único de 32h e saldo da segunda matrícula preservado. Corrigidos aviso residual entre contextos, identificação por matrícula na escala mínima, datas exibidas nos filtros mensais e foco de teclado. Slides finais de 14 páginas entregues no [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e em [PowerPoint](apresentacao/SGF_Treinamento_20261009_final.pptx), com capturas fictícias e notas do instrutor. Material retirado da fila ativa; revisão integral de acessibilidade e aceite institucional não foram declarados concluídos.
+Entrega adicional de 09/10: ciclo moderno real com conta nova fictícia, quatro perfis, duas matrículas e dois CNES; aprovações e inclusões independentes, débito único de 32h e saldo da segunda matrícula preservado. Corrigidos aviso residual entre contextos, identificação por matrícula na escala mínima, datas exibidas nos filtros mensais e foco de teclado. Slides finais de 14 páginas entregues no [Canva](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e em PowerPoint (histórico Git), com capturas fictícias e notas do instrutor. Material retirado da fila ativa; revisão integral de acessibilidade e aceite institucional não foram declarados concluídos.
 
 ## 09. Segurança e preparação para uso institucional
 

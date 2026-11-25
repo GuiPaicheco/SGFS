@@ -33,11 +33,12 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
     };
   };
   runInNewContext(source, {
+    URL,
     SGFRhCalendar: { mount: async ({app,admin}) => { assert.equal(admin,true); app.innerHTML = "Calendário RH"; } },
     URLSearchParams,
     window: { supabase: { createClient: (_url, _key, options) => clientFor(options) }, location: { hash: '', search: '' }, scrollTo() {} },
     sessionStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
-    document: {
+    document: { baseURI: "http://localhost/SGFS/",
       querySelector: selector => ({ '#app': app, '#progress': { style: { setProperty() {} } }, '#toast': toast, '#session-action': { classList, addEventListener() {} } })[selector] || null,
       addEventListener: (name, callback) => { listeners[name] = callback; },
     },

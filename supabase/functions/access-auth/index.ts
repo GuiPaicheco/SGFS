@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 import catalog from '../../../config/rh-units.json' with {type:'json'};
-import {normalizeUnitLogin} from '../_shared/rh-accounts.mjs';
+import {normalizeUnitLogin,verifiedSessionId,validInstitutionalPassword} from '../_shared/rh-accounts.mjs';
 import { recoveryRedirect } from '../_shared/recovery-redirect.ts';
 
 const cors = {
@@ -73,9 +73,10 @@ Deno.serve(async request => {
       const { data: identity, error: identityError } = await admin.auth.getUser(token);
       if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
       const { data: contextProfile, error: profileError } = await admin.from('profiles')
-        .select('id,roles,disabled_at,institutional_cnes_unit_id,servidor:servidores(id,active)')
+        .select('id,roles,disabled_at,must_change_password,institutional_cnes_unit_id,servidor:servidores(id,active)')
         .eq('id', identity.user.id).single();
       if (profileError || !contextProfile || contextProfile.disabled_at) return json({ error: 'Conta indisponível.' }, 403);
+      if(contextProfile.must_change_password)return json({contexts:[]});
       if(contextProfile.institutional_cnes_unit_id) {
         const {data: context,error}=await admin.rpc('rh_account_context',{target_profile:identity.user.id});
         if(error||!context)return json({error:'Conta institucional indisponível.'},403);
@@ -152,7 +153,7 @@ Deno.serve(async request => {
     if (action === 'recover') {
       if(configuredUnit || /^rh-\d{7}$/.test(identifier)) return json({ok:true,message:'Para recuperar o acesso institucional, procure o Administrador.'});
       let redirectTo: string;
-      try { redirectTo = recoveryRedirect(payload.redirectTo, Deno.env.get('SGF_RECOVERY_URLS') || ''); }
+      try { redirectTo = recoveryRedirect(payload.redirectTo, Deno.env.get('SGF_RECOVERY_URLS') || '', Deno.env.get('SGF_RECOVERY_CANONICAL')); }
       catch { return json({ error: 'Endereço de recuperação inválido. Abra o SGF no endereço oficial e tente novamente.' }, 400); }
       if (cpfInput || emailInput || loginInput) {
         const profile = await findProfile(identifier, cpf, cpfInput, emailInput);
@@ -181,7 +182,16 @@ Deno.serve(async request => {
       if (identityError || !identity.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
       const { data: passwordProfile } = await admin.from('profiles').select('roles,disabled_at,institutional_cnes_unit_id').eq('id', identity.user.id).single();
       if (!passwordProfile || passwordProfile.disabled_at) return json({ error: 'Conta indisponível.' }, 403);
-      if(passwordProfile.institutional_cnes_unit_id)return json({error:'A senha institucional é gerenciada pelo Administrador.'},403);
+      if(passwordProfile.institutional_cnes_unit_id){
+        if(!validInstitutionalPassword(password))return json({error:'Escolha uma senha de 8 a 72 caracteres.'},400);
+        const {error}=await admin.rpc('rh_complete_provisional_password',{
+          actor_id:identity.user.id,session_id:verifiedSessionId(token,identity.user.id),new_password:password,
+        });
+        if(error?.message==='RH_PASSWORD_SAME')return json({error:'Escolha uma senha diferente da provisória.'},400);
+        if(error?.message==='RH_NOT_ALLOWED')return json({error:'A troca de senha não está disponível para esta sessão.'},403);
+        if(error)throw error;
+        return json({ok:true});
+      }
       const min = passwordProfile.roles?.includes('administrador') ? 8 : 6;
       if (password.length < min) return json({ error: `Esta conta exige pelo menos ${min} caracteres.` }, 400);
       const { error: updateError } = await admin.auth.admin.updateUserById(identity.user.id, { password });

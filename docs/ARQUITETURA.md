@@ -3,17 +3,17 @@
 ## Visão geral
 
 ```text
-Navegador — index.html + assets/
-  ├─ Supabase Auth e Edge Functions — sessão e operações do RH/Administração
-  ├─ Data API + RLS — leituras autorizadas
-  ├─ /api/cnes — função Python Vercel, exclusiva da Administração
-  │    └─ cnes_service/ — consulta e validação da fonte pública CNES
-  └─ Exportações PDF/XLSX — processamento no navegador
+Navegador — index.html e assets/
+  └─ Gateway Node.js — local/integrado.mjs
+       ├─ Supabase Auth — sessões e recuperação de acesso
+       ├─ PostgREST — Data API protegida por RLS
+       ├─ Deno — funções de supabase/functions/
+       └─ Uvicorn — /api/cnes, exclusivo da Administração
 
-Edge Functions — supabase/functions/
-  └─ PostgreSQL — funções transacionais, autorização, registros e auditoria
-       ├─ public — cadastros e relações protegidos por RLS
-       └─ private — fonte CNES, registros RH e identificação de operadores
+Auth, PostgREST e as funções usam a base PostgreSQL do SGFS.
+  ├─ auth — contas e sessões
+  ├─ public — cadastros e relações protegidos por RLS
+  └─ private — fonte CNES, registros RH e operadores
 ```
 
 O frontend é uma aplicação estática sem framework. `assets/app.js` coordena sessão, navegação e módulos especializados. O build versiona assets pelo conteúdo e publica apenas uma lista de arquivos. Bibliotecas locais de exportação são carregadas quando necessárias.

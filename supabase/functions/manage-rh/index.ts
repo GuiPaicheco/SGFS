@@ -1,6 +1,6 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.117.2';
 import {validateAccessContext,contextHeaders} from '../_shared/access-context.ts';
-import {verifiedSessionId,provisionRhAccount} from '../_shared/rh-accounts.mjs';
+import {verifiedSessionId,provisionRhAccount,validInstitutionalPassword} from '../_shared/rh-accounts.mjs';
 import {limitedJson} from '../_shared/limited-json.mjs';
 import {calendarQuery,calendarWindow,bindingInput,birthdayInput} from '../_shared/rh-calendar.mjs';
 import {absenceInput,absenceReturnInput} from '../_shared/rh-absence.mjs';
@@ -60,11 +60,18 @@ Deno.serve(async request=>{
   const {data:profile,error:profileError}=await auth.from('profiles').select('roles,disabled_at,must_change_password,institutional_cnes_unit_id').eq('id',identity.user.id).single();
   if(profileError||!profile||profile.disabled_at||profile.must_change_password)throw Error('RH_NOT_ALLOWED');
   const payload=await limitedJson(request),actor=identity.user.id;
+  const historyAction=payload.action==='record-history'||payload.action==='legacy-detail';
+  const historyArgs=()=>{
+   const legacy=payload.action==='legacy-detail',id=legacy?payload.leaveId:payload.entryId,page=payload.page??0;
+   if(!uuid.test(id||'')||!Number.isInteger(page)||page<0||page>10000)throw Error('RH_INPUT_INVALID');
+   return {target_entry:legacy?null:id,target_legacy:legacy?id:null,page_index:page};
+  };
   const isLeaveAction=['leave-resources','preview-leave','create-leave','leave-detail','close-leave','preview-revision','revise-leave'].includes(payload.action);
   if(profile.institutional_cnes_unit_id) {
    if(request.headers.get('x-sgf-role')!=='rh'||profile.roles.length!==1||profile.roles[0]!=='rh')throw Error('RH_NOT_ALLOWED');
    const session=verifiedSessionId(token,actor);
    const rpc=async(name:string,args:Record<string,unknown>={})=>{const {data,error}=await auth.rpc(name,{target_profile:actor,target_session:session,...args});if(error)throw error;return data;};
+   if(historyAction)return json(await rpc('rh_record_history',{target_cnes:null,...historyArgs()}));
    if(payload.action==='session')return json(await rpc('rh_session_state'));
    if(payload.action==='select-operator'){if(!uuid.test(payload.grantId||''))throw Error('RH_INPUT_INVALID');return json(await rpc('rh_select_operator',{target_grant:payload.grantId}));}
    if(payload.action==='clear-operator')return json(await rpc('rh_clear_operator'));
@@ -96,6 +103,10 @@ Deno.serve(async request=>{
   const configured=catalog.find(unit=>unit.cnes===payload.cnes);if(!configured)throw Error('RH_UNIT_INVALID');
   const {data:unit,error:unitError}=await db.from('cnes_units').select('id').eq('code',configured.cnes).eq('active',true).single();
   if(unitError||!unit)throw Error('RH_UNIT_INVALID');
+  if(historyAction){
+   const {data,error}=await db.rpc('rh_record_history',{target_profile:actor,target_session:verifiedSessionId(token,actor),target_cnes:unit.id,...historyArgs()});
+   if(error)throw error;return json(data);
+  }
   if(isLeaveAction){
    const operation=leaveOperation(payload);
    const {data,error}=await db.rpc(operation.name,{target_profile:actor,target_session:verifiedSessionId(token,actor),target_cnes:unit.id,...operation.args});
@@ -126,14 +137,10 @@ Deno.serve(async request=>{
    if(typeof payload.enabled!=='boolean'||!Number.isInteger(payload.version)||payload.version<1)throw Error('RH_INPUT_INVALID');
    return json(await rpc('rh_set_account_status',{target_cnes:unit.id,target_enabled:payload.enabled,expected_version:payload.version}));
   }
-  if(payload.action==='reset-default')payload.password='123456';
-  if(['reset-password','reset-default'].includes(payload.action)) {
-   if(typeof payload.password!=='string'||payload.password.length<(payload.action==='reset-default'?6:8)||payload.password.length>72)throw Error('RH_PASSWORD_INVALID');
-   const directory=await rpc('rh_account_directory'),account=directory.find((a:{cnes:string})=>a.cnes===configured.cnes);
-   if(!account?.profile_id)throw Error('RH_UNIT_INVALID');
-   await rpc('rh_invalidate_sessions',{target_cnes:unit.id});
-   const {error}=await auth.auth.admin.updateUserById(account.profile_id,{password:payload.password});
-   if(error)throw Error('RH_AUTH_UNAVAILABLE');return json({ok:true});
+  if(payload.action==='reset-password') {
+   if(!validInstitutionalPassword(payload.password))throw Error('RH_PASSWORD_INVALID');
+   await rpc('rh_reset_provisional_password',{target_cnes:unit.id,initial_password:payload.password});
+   return json({ok:true});
   }
   return json({error:'Ação inválida.'},400);
  }catch(error){

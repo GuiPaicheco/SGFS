@@ -25,10 +25,11 @@ async function openQuick() {
     },
   };
   runInNewContext(source, {
+    URL,
     URLSearchParams,
     sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
     window: { supabase: { createClient: () => client }, location: { hash: '', search: '' }, scrollTo() {} },
-    document: {
+    document: { baseURI: "http://localhost/SGFS/",
       querySelector(selector) {
         return ({ '#app': app, '#progress': progress, '#toast': toast, '#session-action': sessionAction })[selector]
           || elements.get(selector) || null;

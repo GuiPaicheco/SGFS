@@ -92,8 +92,8 @@ O SGF reúne solicitação, análise, planejamento da escala, comunicação e hi
 
 Use uma tela por slide, com título curto e no máximo três instruções de operação. Preserve verde/dourado da identidade visual e prefira texto de corpo legível na projeção; não reduza a interface inteira a uma miniatura. Recorte sem perder título, contexto e legenda. Nunca exponha CPF/e-mail de pessoas reais, token ou senha.
 
-1. Simulação: `imagens/simulacao-bloco08.png`. Fala: “Esta tela estima datas, mas não envia um pedido nem valida seu saldo.”
-2. Feriados: `imagens/feriados-bloco08.png`. Fala: “Uma mudança de calendário pode mudar o retorno; confira os avisos e os dias atribuídos.”
-3. Comprovante: `imagens/comprovante-teste-bloco08.png`. Fala: “Este exemplo cancelado mostra o formato e as duas assinaturas; não autoriza afastamento.”
+1. Simulação: `histórico Git: imagens/simulacao-bloco08.png`. Fala: “Esta tela estima datas, mas não envia um pedido nem valida seu saldo.”
+2. Feriados: `histórico Git: imagens/feriados-bloco08.png`. Fala: “Uma mudança de calendário pode mudar o retorno; confira os avisos e os dias atribuídos.”
+3. Comprovante: `histórico Git: imagens/comprovante-teste-bloco08.png`. Fala: “Este exemplo cancelado mostra o formato e as duas assinaturas; não autoriza afastamento.”
 
-Material final de 09/10/2026: [Canva — 14 slides](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e [PowerPoint editável com notas do instrutor](apresentacao/SGF_Treinamento_20261009_final.pptx). Capturas adicionais do ciclo moderno fictício: perfis, distribuição diária, protocolo, aprovação RH e calendário (`imagens/*-bloco08.jpg`). Não inserir imagens de outro produto ou telas inventadas. A base DEMO07 foi ensaiada com rollback; o novo ensaio TESTE08 é identificado separadamente em VALIDACAO_BLOCO_08.md. Treinamento não substitui aceite institucional.
+Material final de 09/10/2026: [Canva — 14 slides](https://www.canva.com/d/Bd4ZkdD8RE-4lxi) e PowerPoint editável com notas do instrutor (histórico Git). Capturas adicionais do ciclo moderno fictício: perfis, distribuição diária, protocolo, aprovação RH e calendário (`histórico Git: imagens/*-bloco08.jpg`). Não inserir imagens de outro produto ou telas inventadas. A base DEMO07 foi ensaiada com rollback; o novo ensaio TESTE08 é identificado separadamente em VALIDACAO_BLOCO_08.md. Treinamento não substitui aceite institucional.

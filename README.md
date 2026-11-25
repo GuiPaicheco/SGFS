@@ -1,11 +1,31 @@
 # SGFS — Sistema de Gestão de Funcionários da Saúde
 
-Aplicação web de apoio à organização de profissionais, calendários, férias e afastamentos de equipes de saúde.
+Aplicação web para organizar profissionais, calendários, férias e afastamentos de equipes de saúde. A distribuição principal usa PostgreSQL com Supabase Auth, PostgREST, funções em Deno e o gateway Node.js.
 
-## Proposta
+## Executar localmente
 
-Reunir informações de planejamento e facilitar a conferência dos períodos de ausência, com uma interface voltada às rotinas administrativas.
+Com o banco PostgreSQL provisionado e os componentes configurados, execute `node local/integrado.mjs`. A instalação Windows já provisionada também pode usar [Iniciar SGFS.cmd](local/Iniciar%20SGFS.cmd). O endereço local padrão é `http://127.0.0.1:8089/SGFS/`. Consulte o [guia de implantação](local/IMPLANTACAO.md) para os requisitos, a restauração da base e a atualização do esquema.
+
+## Configuração
+
+Use [.env.example](.env.example) como referência para as variáveis do processo. A aplicação não carrega automaticamente arquivos `.env`. Nunca coloque `SUPABASE_SERVICE_ROLE_KEY` na interface. O gateway gera a chave pública a partir do segredo institucional e a inclui no build em `dist-municipal/`.
+
+## Testes e build
+
+Execute `node --test tests/*.test.mjs` e os [testes Python](docs/DESENVOLVIMENTO.md). O CI testa a cadeia de migrações em PostgreSQL com a pilha Supabase local. O gateway gera a interface integrada na inicialização.
+
+## Estrutura
+
+- `index.html` e `assets/` contêm a interface e as bibliotecas de navegador.
+- `local/` contém o gateway, o inicializador Windows e ensaios da instalação integrada.
+- `api/` e `cnes_service/` consultam a fonte CNES.
+- `supabase/` contém as migrações PostgreSQL e as funções de backend. Os papéis históricos RH/Diretor permanecem nas estruturas de compatibilidade.
+- `docs/` contém o manual, a arquitetura e os procedimentos de operação.
+
+## Implantação e manutenção
+
+Consulte [hospedagem](docs/HOSPEDAGEM.md) e [publicação](docs/PUBLICACAO.md) para instalar e atualizar a distribuição integrada.
 
 ## Licença
 
-Consulte [LICENSE](LICENSE) para as condições de uso. A visibilidade pública do código não implica licença de uso irrestrito.
+Consulte [LICENSE](LICENSE) para as condições de uso.

@@ -13,9 +13,13 @@ export function verifiedSessionId(token,profileId) {
   }catch{throw Error('RH_SESSION_INVALID');}
 }
 
+export function validInstitutionalPassword(password) {
+  return typeof password==='string' && [...password].length>=8 && new TextEncoder().encode(password).length<=72 && password!=='123456';
+}
+
 export async function provisionRhAccount(slot,password,{getUser,createUser,finish}) {
   if(slot.profile_id) return {status:'already_exists',cnes:slot.code};
-  if(typeof password!=='string'||password.length<8||password.length>72) throw Error('RH_PASSWORD_INVALID');
+  if(!validInstitutionalPassword(password)) throw Error('RH_PASSWORD_INVALID');
   const matches=user=>user?.id===slot.auth_user_id&&user.email===slot.internal_email
     &&user.app_metadata?.sgf_rh_cnes===slot.code;
   let found=await getUser(slot.auth_user_id);

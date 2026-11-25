@@ -34,11 +34,12 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
     '#access-password': { value: 'senha-segura' },
   };
   runInNewContext(source, {
+    URL,
     SGFRhCalendar: { mount: async ({app,admin}) => { assert.equal(admin,true); app.innerHTML = "Calendário RH"; } },
     URLSearchParams,
     window: { supabase: { createClient: clientFor }, location: { hash: '', search: '' }, scrollTo() {} },
     sessionStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
-    document: {
+    document: { baseURI: "http://localhost/SGFS/",
       querySelector: selector => ({ '#app': app, '#progress': { style: { setProperty() {} } }, '#toast': { classList }, '#session-action': { classList, addEventListener() {} }, ...inputs })[selector] || null,
       addEventListener: (name, callback) => { listeners[name] = callback; },
     },

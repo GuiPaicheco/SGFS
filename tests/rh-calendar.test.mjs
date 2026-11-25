@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
-import {calendarQuery,bindingInput} from '../supabase/functions/_shared/rh-calendar.mjs';
+import {calendarQuery,calendarWindow,bindingInput} from '../supabase/functions/_shared/rh-calendar.mjs';
 import '../assets/access-policy.js';
 const source=readFileSync(new URL('../assets/rh-calendar-ui.js',import.meta.url),'utf8');
 const uuid='a0000000-0000-0000-0000-000000000001';
@@ -97,4 +97,13 @@ test('conflito de colega fora da página é marcado, sem inventar aniversário f
 test('contrato aceita seleções exatas e rejeita listas ou critérios abusivos',()=>{
  const base={month:'2027-01',page:0,search:''};assert.deepEqual(calendarQuery({...base,filters:{full_name:[' ANA ','ANA'],cbo:['001234'],conflict_criteria:['cbo','team'],conflict_only:true}}).filter_json,{full_name:['ANA'],cbo:['001234'],conflict_criteria:['cbo','team'],conflict_only:true});
  for(const filters of [{conflict_criteria:['invalid']},{conflict_only:'true'},{team:[null]},{full_name:Array(201).fill('Ana')},{cbo:['']},{position:['x'.repeat(241)]}])assert.throws(()=>calendarQuery({...base,filters}),/RH_INPUT_INVALID/);
+});
+
+test('páginas de dez profissionais alcançam o último lote de 1241 registros',()=>{
+ const input={month:'2026-11',page:124,pageSize:10,search:''};
+ const result=calendarWindow(input);
+ assert.equal(result.page_index,124);
+ assert.equal(result.filter_json.page_size,10);
+ for(const size of [10,20,30,50,80,130])assert.equal(calendarWindow({...input,pageSize:size}).filter_json.page_size,size);
+ for(const size of [0,11,131,'all','10'])assert.throws(()=>calendarWindow({...input,pageSize:size}),/RH_INPUT_INVALID/);
 });

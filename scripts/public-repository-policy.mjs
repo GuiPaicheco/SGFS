@@ -2,7 +2,7 @@
 export function inspectPublicFile(name, content = '') {
   const path = name.replaceAll('\\', '/');
   const issues = [];
-  if (/^(?:\.sgf-backups|\.sgf-imports|\.tools|\.vscode|\.vercel|\.netlify|dist|output|tmp)\//.test(path)
+  if (/^(?:\.sgf-backups|\.sgf-imports|\.tools|\.vscode|\.vercel|\.netlify|dist|dist-municipal|output|tmp)\//.test(path)
     || /(?:^|\/)\.env(?:\..*)?$/.test(path) && !path.endsWith('/.env.example') && path !== '.env.example'
     || /\.(?:pem|key|dump|backup)$/i.test(path)) {
     issues.push({ path, line: 0, kind: 'arquivo interno ou segredo potencial' });

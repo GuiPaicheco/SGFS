@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const SUPABASE_URL = 'https://ijhvbzomakbbxverqfqh.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_9upWl4mCzsfuaPE1_gOFkw_9Im-Y4sJ';
+  const SUPABASE_URL = new URL("./backend", document.baseURI).href;
+  const SUPABASE_KEY = "__SGFS_PUBLIC_KEY__";
   const RULE_START = '2025-12-02';
   const HOLIDAYS = new Set();
   const CALENDAR_EVENTS = new Map();
@@ -74,7 +74,7 @@
   const formatDateTime = value => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : '—';
   const formatDayMonth = value => value ? new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(dateFrom(value)) : '—';
   const accessLabel = role => ({ servidor: 'Servidor', diretor: 'Diretor (legado)', rh: 'RH/Diretor', administrador: 'Administrador' })[role] || role;
-  const passwordMin = roles => roles?.includes('administrador') ? 8 : 6;
+  const passwordMin = roles => roles?.includes('administrador') || state.profile?.institutional_cnes_unit_id ? 8 : 6;
   const institutionalEmail = value => /^[^\s@]+@betim\.mg\.gov\.br$/i.test(String(value || '').trim());
   const accessHome = role => state.activeContext?.institutional ? 'rh-workspace' : role === 'administrador' ? 'rh-calendar' : role === 'servidor' ? 'employee-dashboard' : 'dashboard';
   const sessionHeaders = session => ({ 'Content-Type': 'application/json', apikey: SUPABASE_KEY, ...(state.multiAccess && state.profile?.role ? { 'x-sgf-role': state.profile.role } : {}), ...(state.activeContext?.bond_id ? { 'x-sgf-bond': state.activeContext.bond_id } : {}), ...(state.activeContext?.cnes_unit_id ? { 'x-sgf-cnes': state.activeContext.cnes_unit_id } : {}), ...(state.activeContext?.lotacao_id ? { 'x-sgf-lotacao': state.activeContext.lotacao_id } : {}), Authorization: `Bearer ${session.access_token}` });
@@ -451,7 +451,7 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
   }
   async function login(event) {
     event.preventDefault(); const button = event.submitter, identifier = document.querySelector('#access-identifier').value.trim(), password = document.querySelector('#access-password').value; button.disabled = true; button.textContent = 'Entrando…';
-    try { const response = await fetch(`${SUPABASE_URL}/functions/v1/access-auth`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ action: 'login', identifier, password }) }); const body = await response.json().catch(() => ({})); if (!response.ok) { const failure = new Error(body.error || 'Credenciais inválidas ou acesso indisponível.'); failure.retryAfter = Number(body.retry_after) || (response.status === 429 ? 15 : 3); throw failure; } sessionStorage.removeItem('sgf-access-role'); const { error } = await client.auth.setSession({ access_token: body.access_token, refresh_token: body.refresh_token }); if (error) throw error; await loadSession(); if (!state.profile) throw new Error('Senha aceita, mas não foi possível carregar seu perfil. Tente novamente.'); go(body.must_change_password ? 'change-password' : state.profile.role ? accessHome(state.profile.role) : 'choose-access'); }
+    try { const response = await fetch(`${SUPABASE_URL}/functions/v1/access-auth`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ action: 'login', identifier, password }) }); const body = await response.json().catch(() => ({})); if (!response.ok) { const failure = new Error(body.error || 'Credenciais inválidas ou acesso indisponível.'); failure.retryAfter = Number(body.retry_after) || (response.status === 429 ? 15 : 3); throw failure; } sessionStorage.removeItem('sgf-access-role'); const { error } = await client.auth.setSession({ access_token: body.access_token, refresh_token: body.refresh_token }); if (error) throw error; await loadSession(); if (!state.session) { go('home'); return; } if (!state.profile) throw new Error('Senha aceita, mas não foi possível carregar seu perfil. Tente novamente.'); go(body.must_change_password ? 'change-password' : state.profile.role ? accessHome(state.profile.role) : 'choose-access'); }
     catch (error) { const message = document.querySelector('#login-error'); if (message) { message.textContent = error.message; message.classList.remove('hidden'); } else showToast(error.message); applyLoginCooldown(error.retryAfter || 3); }
   }
   const nextAccessFieldKey = prefix => `${prefix}-${++state.accessFieldSequence}`;
@@ -571,9 +571,20 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
   async function loadSession() {
     if (!client) return;
     const { data, error: sessionError } = await client.auth.getSession();
-    if (sessionError) throw new Error('Não foi possível confirmar sua sessão.');
-    state.session = data.session;
+    const sessionEnded = sessionError && (
+      [401,403].includes(sessionError.status) ||
+      ['session_not_found','refresh_token_not_found','refresh_token_already_used','bad_jwt'].includes(sessionError.code)
+    );
+    if (sessionError && !sessionEnded) throw new Error('Não foi possível confirmar sua sessão.');
+    if (sessionEnded) await client.auth.signOut({scope:'local'});
+    state.session = sessionEnded ? null : data.session;
     if (!state.session) { state.profile = null; state.accessContexts = []; state.activeContext = null; sessionStorage.removeItem('sgf-access-role'); sessionStorage.removeItem('sgf-access-context'); return; }
+    if (globalThis.SGFSLegal && !await globalThis.SGFSLegal.requireSession(SUPABASE_URL,SUPABASE_KEY,state.session)) {
+      await client.auth.signOut({scope:'local'});
+      state.session=null;state.profile=null;state.activeContext=null;state.accessContexts=[];
+      sessionStorage.removeItem('sgf-access-role');sessionStorage.removeItem('sgf-access-context');
+      return;
+    }
     let { data: profile, error: profileError } = await client.from('profiles').select('id,full_name,roles,institutional_cnes_unit_id,must_change_password,disabled_at,primary_lotacao:lotacoes!profiles_primary_lotacao_id_fkey(name),servidor:servidores(declared_position,cargo:cargos(name),lotacao:lotacoes!servidores_lotacao_id_fkey(name))').eq('id', state.session.user.id).single();
     if (profileError?.code === '42703' && profileError.message?.includes('roles')) {
       ({ data: profile, error: profileError } = await client.from('profiles').select('id,full_name,role,must_change_password,servidor:servidores(declared_position,cargo:cargos(name),lotacao:lotacoes!servidores_lotacao_id_fkey(name))').eq('id', state.session.user.id).single());
@@ -757,7 +768,7 @@ app.innerHTML = shell('Regras da solicitação', labelType(r.type), `<form id="r
   async function renderUnits(){
     const current=captureView();
     await SGFRhUnits.mount({app,esc,request:rhRequest,isCurrent:current,collect:async code=>{
-      const response=await fetch('/api/cnes?cnes='+encodeURIComponent(code),{headers:sessionHeaders(state.session)});
+      const response=await fetch(new URL('api/cnes?cnes='+encodeURIComponent(code), document.baseURI),{headers:sessionHeaders(state.session)});
       const body=await response.json().catch(()=>({}));if(!response.ok)throw Error(body.detail||'Não foi possível consultar o CNES. Nenhum cadastro alterado.');return body;
     },cnesRequest:async payload=>{
       const response=await fetch(SUPABASE_URL+'/functions/v1/manage-cnes',{method:'POST',headers:{...sessionHeaders(state.session),'x-sgf-role':'administrador'},body:JSON.stringify(payload)});
@@ -1453,7 +1464,19 @@ const bank = canManage && (!r.context_bond_id || state.detailBondResources) ? `<
     } catch (error) { if (current() && state.selected === request) showToast(error.message); }
     finally { operationBusy = false; if (current() && state.selected === request) buttons.forEach(button=>button.disabled=false); }
   }
-function render() { state.route = SGFAccessPolicy.resolve(state.route,state.profile?.role,Boolean(state.session),state.profile?.must_change_password); if(state.session && state.activeContext?.institutional) state.route = ['choose-operator','rh-workspace','rh-launch'].includes(state.route) ? state.route : 'rh-workspace'; if (state.session && state.profile?.must_change_password && !['set-password', 'change-password'].includes(state.route)) state.route = 'change-password'; if (state.session && state.profile && !state.profile.role && !['set-password', 'change-password', 'choose-access'].includes(state.route)) state.route = 'choose-access'; if (['types', 'identity', 'rules', 'dates', 'confirm', 'receipt'].includes(state.route) && (!state.session || state.profile?.role !== 'servidor')) state.route = state.session ? 'choose-access' : 'login'; if (!client) { app.innerHTML = shell('Não foi possível iniciar o SGFS', 'A biblioteca de conexão não foi carregada. Confira sua conexão e atualize a página.', ''); return; } sessionAction.classList.toggle('hidden', !state.session); renderHeaderUser(); renderWorkspaceNav(); ({ 'rh-launch': renderRhLaunch, 'rh-calendar': renderRhCalendar, 'rh-accounts': renderUnits, 'choose-operator': renderRhWorkspace, 'rh-workspace': renderRhWorkspace, 'cnes-import': renderUnits, home: renderHome, quick: renderQuick, 'quick-result': renderQuickResult, types: renderTypes, identity: renderIdentity, rules: renderRules, dates: renderDates, confirm: renderConfirm, receipt: renderReceipt, 'employee-dashboard': renderEmployeeDashboard, 'employee-detail': renderEmployeeDetail, login: renderLogin, 'choose-access': renderAccessChoice, 'access-request': renderAccessRequest, 'recover-password': renderRecoverPassword, 'set-password': renderSetPassword, 'change-password': renderChangePassword, dashboard: renderDashboard, notifications: renderNotifications, 'audit-history': renderAuditHistory, scale: renderScale, 'access-requests': renderAccessRequests, 'access-request-detail': renderAccessRequestDetail, profiles: renderProfiles, 'profile-detail': renderProfileDetail, 'profile-create': renderProfileCreate, catalogs: renderCatalogs, organization: renderOrganization, 'bond-resources': renderBondResources, 'rejection-catalog': renderReasonCatalog, 'calendar-admin': renderCalendarAdmin, 'location-detail': renderLocationDetail, 'reference-detail': renderReferenceDetail, 'employee-registry-detail': renderEmployeeRegistryDetail, inclusions: renderInclusions, 'inclusion-detail': renderInclusionDetail, detail: renderDetail }[state.route] || renderHome)(); app.focus({ preventScroll: true }); }
+function updateSessionNotices() {
+ if(window.SGFSLegal&&!state.session){
+  window.SGFSLegal.ensurePublic().then(accepted=>{
+   if(accepted){if(app.querySelector('#sgfs-terms-retry'))render();else window.SGFSLegal.announceRelease();return;}
+   app.innerHTML='<section class="card"><h2>Entrada do SGFS</h2><p>O aceite é necessário para continuar.</p><button type="button" id="sgfs-terms-retry" class="button button-primary">Ler termos e continuar</button></section>';
+   app.querySelector('#sgfs-terms-retry').onclick=render;
+  });
+ }
+ if(window.SGFSLegal&&!state.profile?.must_change_password&&!['set-password','change-password','recover-password'].includes(state.route)){
+  setTimeout(()=>window.SGFSLegal.announceRelease(Boolean(state.session)),0);
+ }
+}
+function render() { state.route = SGFAccessPolicy.resolve(state.route,state.profile?.role,Boolean(state.session),state.profile?.must_change_password); if(state.session && state.activeContext?.institutional) state.route = ['choose-operator','rh-workspace','rh-launch'].includes(state.route) ? state.route : 'rh-workspace'; if (state.session && state.profile?.must_change_password && !['set-password', 'change-password'].includes(state.route)) state.route = 'change-password'; if (state.session && state.profile && !state.profile.role && !['set-password', 'change-password', 'choose-access'].includes(state.route)) state.route = 'choose-access'; if (['types', 'identity', 'rules', 'dates', 'confirm', 'receipt'].includes(state.route) && (!state.session || state.profile?.role !== 'servidor')) state.route = state.session ? 'choose-access' : 'login'; if (!client) { app.innerHTML = shell('Não foi possível iniciar o SGFS', 'A biblioteca de conexão não foi carregada. Confira sua conexão e atualize a página.', ''); return; } sessionAction.classList.toggle('hidden', !state.session); renderHeaderUser(); renderWorkspaceNav(); if(globalThis.SGFSLegal)updateSessionNotices(); ({ 'rh-launch': renderRhLaunch, 'rh-calendar': renderRhCalendar, 'rh-accounts': renderUnits, 'choose-operator': renderRhWorkspace, 'rh-workspace': renderRhWorkspace, 'cnes-import': renderUnits, home: renderHome, quick: renderQuick, 'quick-result': renderQuickResult, types: renderTypes, identity: renderIdentity, rules: renderRules, dates: renderDates, confirm: renderConfirm, receipt: renderReceipt, 'employee-dashboard': renderEmployeeDashboard, 'employee-detail': renderEmployeeDetail, login: renderLogin, 'choose-access': renderAccessChoice, 'access-request': renderAccessRequest, 'recover-password': renderRecoverPassword, 'set-password': renderSetPassword, 'change-password': renderChangePassword, dashboard: renderDashboard, notifications: renderNotifications, 'audit-history': renderAuditHistory, scale: renderScale, 'access-requests': renderAccessRequests, 'access-request-detail': renderAccessRequestDetail, profiles: renderProfiles, 'profile-detail': renderProfileDetail, 'profile-create': renderProfileCreate, catalogs: renderCatalogs, organization: renderOrganization, 'bond-resources': renderBondResources, 'rejection-catalog': renderReasonCatalog, 'calendar-admin': renderCalendarAdmin, 'location-detail': renderLocationDetail, 'reference-detail': renderReferenceDetail, 'employee-registry-detail': renderEmployeeRegistryDetail, inclusions: renderInclusions, 'inclusion-detail': renderInclusionDetail, detail: renderDetail }[state.route] || renderHome)(); app.focus({ preventScroll: true }); }
 
   document.addEventListener('click', async event => {
     if(!controlAllowed(event.target)) { event.preventDefault(); return showToast('Ação indisponível para o perfil ativo.'); }
@@ -1560,7 +1583,7 @@ function render() { state.route = SGFAccessPolicy.resolve(state.route,state.prof
   });
   document.addEventListener('change', event => { if (event.target.id === 'quick-mode') { const date = document.querySelector('#quick-date'); if (date) date.value = ''; } if (['quick-type', 'quick-mode'].includes(event.target.id)) syncQuickFields(); if (event.target.id === 'mode') { const date = document.querySelector('#chosenDate'); if (date) date.value = event.target.value === 'return' ? state.request.returnDate : state.request.startDate; syncDatesField(); } if (event.target.matches('[data-responsibility-date]')) { const context = responsibilityContexts().find(item => item.bond_unit_id === event.target.value); state.request.dayResponsibilities = (state.request.dayResponsibilities || []).filter(item => item.date !== event.target.dataset.responsibilityDate); if (context) state.request.dayResponsibilities.push({ date: event.target.dataset.responsibilityDate, bond_unit_id: context.bond_unit_id, cnes_unit_id: context.cnes_unit_id }); } if (event.target.name === 'access-role') syncRoleScope('access-role', 'access-scope-group'); if (event.target.name === 'profile-role') syncRoleScope('profile-role', 'profile-scope-group'); });
   document.addEventListener('input', event => { if (event.target.id === 'notes') state.request.notes = event.target.value; if (['cpf', 'employee-cpf', 'access-cpf', 'profile-cpf', 'registry-cpf'].includes(event.target.id)) event.target.value = formatCPF(event.target.value); if (['access-identifier', 'access-password'].includes(event.target.id)) document.querySelector('#login-error')?.classList.add('hidden'); if (event.target.id === 'access-scope-search') filterScopeList('access-scope-search', 'access-scope-list'); if (event.target.id === 'profile-scope-search') filterScopeList('profile-scope-search', 'profile-scope-list'); syncControlValidation(event.target); });
-  sessionAction.addEventListener('click', async () => { await client?.auth.signOut(); sessionStorage.removeItem('sgf-access-role'); sessionStorage.removeItem('sgf-access-context'); rhQueries.clear();rhViews={};state.session = null; state.profile = null; state.rhState = null; state.activeContext = null; state.accessContexts = []; state.requests = []; state.selected = null; state.requestResources = null; state.resourceBond = null; state.detailBondResources = null; state.organization = null; go('home'); });
+  sessionAction.addEventListener('click', async () => { await client?.auth.signOut(); window.SGFSLegal?.resetPublic(); sessionStorage.removeItem('sgf-access-role'); sessionStorage.removeItem('sgf-access-context'); rhQueries.clear();rhViews={};state.session = null; state.profile = null; state.rhState = null; state.activeContext = null; state.accessContexts = []; state.requests = []; state.selected = null; state.requestResources = null; state.resourceBond = null; state.detailBondResources = null; state.organization = null; go('home'); });
   Promise.allSettled([initializeAuthSession(), loadCalendarEvents()]).then(results => {
     if (results[0].status === 'rejected') showToast('Não foi possível carregar sua sessão. Confira a conexão e atualize a página.');
   }).finally(() => render());

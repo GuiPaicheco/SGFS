@@ -12,7 +12,7 @@ from cnes_service.service import CNESService, SourceError
 from cnes_service.parsers import LayoutError
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
-SUPABASE = os.environ.get('SUPABASE_URL', 'https://ijhvbzomakbbxverqfqh.supabase.co').rstrip('/')
+SUPABASE = os.environ.get('SUPABASE_URL', '').rstrip('/')
 CATALOG = json.loads((Path(__file__).resolve().parents[1] / 'config/rh-units.json').read_text(encoding='utf-8'))
 _cache = {}
 _gate = asyncio.Semaphore(2)
