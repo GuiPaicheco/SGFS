@@ -36,7 +36,7 @@ A instalação existente segue como origem durante o ensaio. Após o corte, mant
 
 ## Atualizações do piloto
 
-A versão 1.1.0 exige a migração SQL de melhorias do piloto antes de iniciar o gateway. Publique a interface e a API na mesma janela para manter a paginação e o aceite compatíveis. A versão integrada checa o aceite da sessão e a troca de senha provisória no gateway. Deixe Auth, PostgREST e as funções internas acessíveis somente pelo gateway.
+A versão 1.1.0 exige a migração SQL de melhorias do piloto. Após preparar o esquema Auth e aplicar as migrações, execute [auth-permissions.sql](auth-permissions.sql) com a conta administrativa da base antes de iniciar o gateway. O script concede ao service_role as permissões de coluna usadas na troca de senha e permite encerrar sessões do Auth. Publique a interface e a API na mesma janela para manter a paginação e o aceite compatíveis. A versão integrada checa o aceite da sessão e a troca de senha provisória no gateway. Deixe Auth, PostgREST e as funções internas acessíveis somente pelo gateway.
 
 As contas existentes conservam suas senhas até a Administração selecionar **Resetar senha** e combinar a troca com a unidade. A recuperação por e-mail de Administração continua disponível. Valide os Termos de Uso e o Aviso de Privacidade com a Prefeitura antes de liberar esta versão para o piloto. Para mudar os documentos, atualize a versão exibida na interface e a versão exigida pela RPC na mesma implantação.
 

@@ -43,6 +43,8 @@ jobs:
         run: |
           supabase db start
           supabase db reset --local --no-seed
+      - name: Configurar privilégios dos serviços no esquema Auth
+        run: docker exec -i supabase_db_sgf psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < local/auth-permissions.sql
       - name: Ensaiar fluxos SQL integrados sem persistir fixtures
         run: |
           set -euo pipefail
