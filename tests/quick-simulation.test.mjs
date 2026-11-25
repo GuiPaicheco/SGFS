@@ -25,6 +25,7 @@ async function openQuick() {
     },
   };
   runInNewContext(source, {
+    SGFS_PUBLIC_KEY: "sb_publishable_fixture",
     URL,
     URLSearchParams,
     sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },

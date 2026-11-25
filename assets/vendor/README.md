@@ -1,4 +1,4 @@
-Bibliotecas usadas pela interface. O gateway inclui o SDK Supabase fornecido na instalação. As bibliotecas de exportação são carregadas conforme a operação.
+Bibliotecas usadas pela interface. O SDK Supabase 2.117.2 está incluído no repositório e é usado por padrão nos builds. As bibliotecas de exportação são carregadas conforme a operação.
 
 | Biblioteca | Versão | Origem oficial | Licença |
 | --- | --- | --- | --- |

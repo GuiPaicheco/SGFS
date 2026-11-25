@@ -2,18 +2,28 @@
 
 A versão integrada usa o frontend original, PostgreSQL, PostgREST, Supabase Auth executado no próprio servidor, Deno para as funções TypeScript e Uvicorn para a API CNES. A instalação usa credenciais e processos próprios. O navegador acessa somente o endereço do SGFS. A coleta CNES exige acesso de saída do servidor ao Datasus.
 
+## Instalação a partir do ZIP
+
+Baixe o ZIP pelo GitHub e extraia-o no servidor. Use Node.js 24 e Python 3.14. Provisione PostgreSQL, Supabase Auth, PostgREST e Deno conforme os passos abaixo.
+
+1. Copie `.env.example` para `.env` na pasta extraída e preencha as URLs da base e os caminhos dos executáveis. Mantenha esse arquivo com acesso restrito à conta de serviço.
+2. Instale as dependências Python com `python -m pip install -r requirements.txt` no ambiente apontado por `SGFS_PYTHON_EXE`.
+3. Na raiz da pasta extraída, execute `node --env-file=.env local/integrado.mjs`. Em produção, use esse comando com um gerenciador de serviços.
+
+O ZIP inclui a interface, as funções, as migrações e o SDK Supabase para navegador. O servidor gera a configuração da interface com a chave pública do próprio ambiente.
+
 ## Ensaio Windows com ambiente provisionado
 
 Na pasta do projeto, abra [Iniciar SGFS.cmd](Iniciar%20SGFS.cmd) e acesse `http://127.0.0.1:8089/SGFS/`. O inicializador requer Node.js 24 no PATH, PostgreSQL local já provisionado e binários e segredos protegidos pelo Windows em `%LOCALAPPDATA%/SGFS-runtime`. O banco integrado usa o PostgreSQL local na porta 55432, separado do banco de ensaio anterior e do servidor municipal. A caixa de e-mails de ensaio abre em `http://127.0.0.1:19026/`. Ela captura mensagens localmente. Pressione Ctrl+C para encerrar o gateway e seus serviços auxiliares. O PostgreSQL é administrado separadamente.
 
-O inicializador espera os arquivos protegidos jwt.dpapi, auth.dpapi e rest.dpapi e os binários de Auth, PostgREST, Deno, Python e Mailpit. Para caminhos personalizados, use SGFS_RUNTIME, SGFS_POSTGRES_BIN e SGFS_POSTGRES_HOME. Para outras instalações, configure o ambiente do gateway diretamente. O modelo de variáveis está em [../.env.example](../.env.example).
+O inicializador espera os arquivos protegidos jwt.dpapi, auth.dpapi e rest.dpapi e os binários de Auth, PostgREST, Deno, Python e Mailpit. O SDK do navegador já acompanha o projeto. Para caminhos personalizados, use SGFS_RUNTIME, SGFS_POSTGRES_BIN e SGFS_POSTGRES_HOME. Para outras instalações, configure o ambiente do gateway diretamente. O modelo de variáveis está em [../.env.example](../.env.example).
 
 ## Publicação
 
 - Configure `SGFS_SITE_URL` com a URL HTTPS oficial, incluindo `/SGFS/`. O proxy da Prefeitura deve repassar esse caminho e o cabeçalho de host para o processo Node em loopback. Os serviços internos devem permanecer em loopback.
 - Configure `SGFS_AUTH_DATABASE_URL` e `SGFS_REST_DATABASE_URL` com contas de serviço separadas. A primeira administra o esquema Auth. A segunda alterna explicitamente entre os papéis do aplicativo conforme o token. Restaure as permissões e verifique as políticas RLS antes da publicação. Use validação de TLS para o PostgreSQL remoto conforme a configuração da TI.
-- Aponte `SGFS_AUTH_EXE`, `SGFS_POSTGREST_EXE`, `SGFS_DENO_EXE`, `SGFS_PYTHON_EXE` e `SGFS_BROWSER_SDK_FILE` para os componentes instalados. O SDK precisa ser o bundle UMD da versão 2.117.2. Instale as dependências com `python -m pip install -r requirements.txt` no Python de serviço. Execute `deno cache --no-lock supabase/functions/*/index.ts` na raiz (ou passe a lista de arquivos explicitamente se o shell não expandir o padrão). Use a mesma conta de serviço para preencher o cache e executar o gateway.
-- Guarde `SGFS_JWT_SECRET` no gerenciador de segredos do ambiente e configure o SMTP institucional com `SGFS_SMTP_HOST`, `SGFS_SMTP_PORT`, `SGFS_SMTP_USER`, `SGFS_SMTP_PASSWORD` e `SGFS_SMTP_FROM`. Nunca publique as credenciais de banco ou a chave de serviço. A geração de `dist-municipal` inclui apenas a chave pública.
+- Aponte `SGFS_AUTH_EXE`, `SGFS_POSTGREST_EXE`, `SGFS_DENO_EXE`, `SGFS_PYTHON_EXE` para os componentes instalados. Instale as dependências com `python -m pip install -r requirements.txt` no Python de serviço. Execute `deno cache --no-lock supabase/functions/*/index.ts` na raiz (ou passe a lista de arquivos explicitamente se o shell não expandir o padrão). Use a mesma conta de serviço para preencher o cache e executar o gateway.
+- Guarde `SGFS_JWT_SECRET` no gerenciador de segredos do ambiente e configure o SMTP institucional com `SGFS_SMTP_HOST`, `SGFS_SMTP_PORT`, `SGFS_SMTP_USER`, `SGFS_SMTP_PASSWORD` e `SGFS_SMTP_FROM`. Nunca publique as credenciais de banco ou a chave de serviço. A geração de `dist-municipal` inclui a chave pública em `assets/sgfs-config.js`.
 - Execute `node local/integrado.mjs` com um gerenciador de serviços. Configure a conta, o reinício automático, o log e a verificação de saúde no ambiente municipal.
 - Para a virada, tire um backup atualizado em uma janela sem novas gravações. Preserve as contas e os identificadores originais. Abra sessões novas no destino após a troca. Aprove os testes de login, recuperação, isolamento por unidade, lançamentos, auditoria e CNES antes de reabrir o acesso.
 

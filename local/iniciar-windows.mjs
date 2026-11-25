@@ -24,7 +24,6 @@ const env = {
   SGFS_DENO_EXE: join(runtime, 'deno', 'deno.exe'),
   SGFS_PYTHON_EXE: python,
   SGFS_MAILPIT_EXE: join(runtime, 'mailpit', 'mailpit.exe'),
-  SGFS_BROWSER_SDK_FILE: join(runtime, 'package', 'dist', 'umd', 'supabase.js'),
 };
 
 const pgctl = join(pg, 'pg_ctl.exe');

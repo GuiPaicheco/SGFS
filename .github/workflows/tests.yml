@@ -20,6 +20,8 @@ jobs:
         run: node scripts/check-public-repository.mjs
       - name: Executar testes automatizados
         run: node --test tests/*.test.mjs
+      - name: Gerar e validar o pacote da interface para a Vercel
+        run: node scripts/build-vercel.mjs
       - uses: actions/setup-python@v5
         with:
           python-version: '3.14'

@@ -33,6 +33,7 @@ test('um CPF com quatro acessos escolhe a área e troca o contexto das consultas
     };
   };
   runInNewContext(source, {
+    SGFS_PUBLIC_KEY: "sb_publishable_fixture",
     URL,
     SGFRhCalendar: { mount: async ({app,admin}) => { assert.equal(admin,true); app.innerHTML = "Calendário RH"; } },
     URLSearchParams,

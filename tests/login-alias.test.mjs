@@ -34,6 +34,7 @@ for (const schema of ['atual', 'múltiplos acessos']) test(`login administrativo
     '#access-password': { value: 'senha-segura' },
   };
   runInNewContext(source, {
+    SGFS_PUBLIC_KEY: "sb_publishable_fixture",
     URL,
     SGFRhCalendar: { mount: async ({app,admin}) => { assert.equal(admin,true); app.innerHTML = "Calendário RH"; } },
     URLSearchParams,

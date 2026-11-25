@@ -7,19 +7,20 @@ import path from 'node:path';
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const outputName = 'dist-municipal';
 const output = path.join(root, outputName);
-const publicKey = process.env.SGFS_MUNICIPAL_PUBLIC_KEY ?? '';
-const localSdk = process.env.SGFS_BROWSER_SDK_FILE;
+const offline = process.argv.includes('--without-backend');
+const publicKey = offline ? '' : process.env.SGFS_MUNICIPAL_PUBLIC_KEY ?? '';
+const sdkFile = process.env.SGFS_BROWSER_SDK_FILE || path.join(root, 'assets/vendor/supabase.min.js');
 function isPublishableKey(key) {
   if (/^sb_publishable_[A-Za-z0-9_-]+$/.test(key)) return true;
   if (!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(key)) return false;
   try { return JSON.parse(Buffer.from(key.split('.')[1], 'base64url')).role === 'anon'; }
   catch { return false; }
 }
-if (!isPublishableKey(publicKey)) {
+if (!offline && !isPublishableKey(publicKey)) {
   throw Error('Configure SGFS_MUNICIPAL_PUBLIC_KEY com a chave pública do ambiente municipal.');
 }
-if (!localSdk) throw Error('Configure SGFS_BROWSER_SDK_FILE com o caminho do SDK UMD.');
-const sdk = await readFile(localSdk);
+const sdk = await readFile(sdkFile);
+const clientConfig = 'globalThis.SGFS_PUBLIC_KEY = ' + JSON.stringify(publicKey) + ';\n';
 if(path.dirname(output)!==root||path.basename(output)!==outputName)throw Error('Saída fora do projeto.');
 await rm(output,{recursive:true,force:true});
 await mkdir(path.join(output, 'assets'), { recursive: true });
@@ -29,16 +30,13 @@ for (const name of ['logo.png']) {
 const html = await readFile(path.join(root, 'index.html'), 'utf8');
 const moduleCache = new Map();
 async function readPublicAsset(file) {
+  if (file === 'assets/sgfs-config.js') return clientConfig;
   if (file === 'assets/vendor/supabase.min.js') return sdk;
-  const bytes = await readFile(path.join(root, file));
-  if (file !== 'assets/app.js') return bytes;
-  const original = bytes.toString('utf8');
-  const placeholder = '"__SGFS_PUBLIC_KEY__"';
-  if (!original.includes(placeholder)) throw Error('Marcador da chave pública ausente.');
-  return original.replace(placeholder, JSON.stringify(publicKey));
+  return readFile(path.join(root, file));
 }
 const publicAsset=name=>versionModuleAsset(name,readPublicAsset,moduleCache);
 await writeFile(path.join(output,'index.html'),await versionPublicAssets(html,publicAsset), 'utf8');
+await writeFile(path.join(output,'assets','sgfs-config.js'), clientConfig, 'utf8');
 // These modules are exercised by compatibility tests but are no longer loaded by index.html.
 const legacyUi = new Set(['rh-manual-ui.js', 'cnes-import-ui.js', 'rh-bond-ui.js']);
 for (const entry of await readdir(path.join(root, 'assets'), { withFileTypes: true })) {

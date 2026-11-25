@@ -14,6 +14,13 @@ if (!site.pathname.endsWith('/') || site.pathname === '/' || !/^https?:$/.test(s
   throw Error('SGFS_SITE_URL deve ser um endereço HTTP(S) com o diretório de publicação e uma barra final.');
 }
 const base = site.pathname;
+const recoveryUrls = (process.env.SGFS_RECOVERY_URLS || '').split(',').map(value => value.trim()).filter(Boolean).map(value => {
+  const alias = new URL(value);
+  if (alias.protocol !== 'https:' || alias.username || alias.password || alias.search || alias.hash || !alias.pathname.endsWith('/')) {
+    throw Error('Cada URL de recuperação adicional deve ser HTTPS, com barra final.');
+  }
+  return alias.href;
+});
 const gateway = local.origin + base + 'backend';
 const output = resolve(root, 'dist-municipal');
 const functions = [
@@ -52,7 +59,7 @@ const denoExe = required('SGFS_DENO_EXE');
 
 const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(SGFS_|GOTRUE_|PGRST_|SUPABASE_|DATABASE_URL$)/i.test(key)));
 const build = spawnSync(process.execPath, ['scripts/build-static.mjs'], {
-  cwd: root, stdio: 'inherit', env: { ...cleanEnv, SGFS_MUNICIPAL_PUBLIC_KEY: anonKey, SGFS_BROWSER_SDK_FILE: required('SGFS_BROWSER_SDK_FILE') },
+  cwd: root, stdio: 'inherit', env: { ...cleanEnv, SGFS_MUNICIPAL_PUBLIC_KEY: anonKey, ...(process.env.SGFS_BROWSER_SDK_FILE ? { SGFS_BROWSER_SDK_FILE: process.env.SGFS_BROWSER_SDK_FILE } : {}) },
 });
 if (build.status !== 0) throw Error('Falha ao compilar a interface municipal.');
 
@@ -179,7 +186,7 @@ start('Auth', authExe, [], {
   GOTRUE_API_HOST: '127.0.0.1', GOTRUE_API_PORT: String(authPort),
   API_EXTERNAL_URL: new URL('backend/auth/v1', site).href,
   GOTRUE_DB_DRIVER: 'postgres', GOTRUE_DB_DATABASE_URL: authDb,
-  GOTRUE_SITE_URL: site.href, GOTRUE_URI_ALLOW_LIST: site.href,
+  GOTRUE_SITE_URL: site.href, GOTRUE_URI_ALLOW_LIST: [site.href, ...recoveryUrls].join(','),
   GOTRUE_DISABLE_SIGNUP: 'true', GOTRUE_EXTERNAL_EMAIL_ENABLED: 'true',
   GOTRUE_JWT_SECRET: secret, GOTRUE_JWT_ADMIN_ROLES: 'service_role',
   GOTRUE_JWT_AUD: 'authenticated', GOTRUE_JWT_DEFAULT_GROUP_NAME: 'authenticated',
@@ -212,7 +219,7 @@ start('Funções', denoExe, ['run', '--no-prompt', '--no-lock', '--cached-only',
     join(root, 'local', 'edge-entry.ts')], {
     SGFS_FUNCTIONS: functions.join(','), SGFS_FUNCTION_PORT: String(edgePort),
     SUPABASE_URL: gateway, SUPABASE_ANON_KEY: anonKey, SUPABASE_SERVICE_ROLE_KEY: serviceKey,
-    SGF_RECOVERY_CANONICAL: site.href,
+    SGF_RECOVERY_CANONICAL: site.href, SGF_RECOVERY_URLS: recoveryUrls.join(','),
   });
 
 async function waitForService(name, port, path, expected) {

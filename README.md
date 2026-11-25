@@ -24,7 +24,7 @@ Execute `node --test tests/*.test.mjs` e os [testes Python](docs/DESENVOLVIMENTO
 
 ## Implantação e manutenção
 
-Consulte [hospedagem](docs/HOSPEDAGEM.md) e [publicação](docs/PUBLICACAO.md) para instalar e atualizar a distribuição integrada.
+Baixe o [ZIP do SGFS](https://github.com/GuiPaicheco/SGFS/archive/refs/heads/main.zip) e siga o [guia de implantação no servidor](local/IMPLANTACAO.md). Para publicar a interface via Vercel, consulte [hospedagem](docs/HOSPEDAGEM.md).
 
 ## Licença
 

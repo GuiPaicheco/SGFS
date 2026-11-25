@@ -1,15 +1,18 @@
 # Hospedagem do SGFS
 
-## Distribuição PostgreSQL
+## Servidor PostgreSQL
 
-Execute o gateway Node.js atrás do proxy HTTPS institucional. O gateway serve a interface e encaminha as chamadas de sessão, banco, funções de aplicação e CNES. Use PostgreSQL dedicado à aplicação e mantenha Auth, PostgREST, Deno e Uvicorn acessíveis apenas em loopback. Consulte [implantação integrada](../local/IMPLANTACAO.md).
+Baixe o ZIP do GitHub, extraia no servidor e siga o [guia de implantação](../local/IMPLANTACAO.md). O gateway Node.js serve a aplicação e encaminha as chamadas de sessão, banco, funções e CNES.
 
-A geração da interface não provisiona contas nem modifica o banco. Aplique as migrações no ambiente autorizado e confira as políticas RLS antes de abrir o serviço.
+## Vercel
 
-## Instalação anterior
+O projeto sgfsbetim publica o mesmo build da interface usada no servidor. A Vercel encaminha sessões, dados e CNES para o gateway SGFS. PostgreSQL, Auth, PostgREST e Deno executam no servidor descrito no guia. O deploy da interface não provisiona contas.
 
-O site anterior da Vercel exibe o aviso de manutenção. A configuração da distribuição integrada desativa o deploy automático da branch `main` na Vercel e o build de produção na Netlify. A configuração anterior e o aviso estão registrados no commit `0fa84f6`.
+- No projeto Vercel, configure `SGFS_GATEWAY_URL` com a URL HTTPS do gateway, incluindo o caminho e a barra final.
+- Configure `SGFS_MUNICIPAL_PUBLIC_KEY` com a chave pública `anon` gerada pelo gateway. Após iniciar o servidor, ela pode ser obtida no arquivo servido em `assets/sgfs-config.js`.
+- No servidor, adicione o domínio público da Vercel com barra final em `SGFS_RECOVERY_URLS` e reinicie o gateway. Isso autoriza o retorno de recuperação de senha ao endereço público.
+- Defina as duas variáveis na Vercel e gere um novo deploy. Sem as duas configurações, a página exibe manutenção e os fluxos dependentes do banco permanecem indisponíveis.
 
 ## Conferência após publicação
 
-Confirme a versão e a disponibilidade do gateway. Valide login, recuperação, isolamento por unidade, calendário e exportações com contas autorizadas e dados fictícios. Consulte [publicação](PUBLICACAO.md).
+Confira a versão e a disponibilidade do gateway. Valide login, recuperação, isolamento por unidade, calendário e exportações em ambiente isolado com dados fictícios. Consulte [publicação](PUBLICACAO.md).

@@ -17,7 +17,7 @@ O verificador examina os arquivos rastreados e indica padrões bloqueados sem im
 
 Siga a [implantação integrada](../local/IMPLANTACAO.md) em um banco de desenvolvimento. Configure as variáveis do processo conforme [.env.example](../.env.example). Execute `node local/integrado.mjs` para gerar a interface e iniciar os serviços. A saída pública é `dist-municipal/`. A entrada da API Python é `api.cnes:app`.
 
-Para gerar somente a interface, configure `SGFS_MUNICIPAL_PUBLIC_KEY` e `SGFS_BROWSER_SDK_FILE` e execute `node scripts/build-static.mjs`. A saída espera as rotas do gateway no mesmo endereço da interface.
+Para gerar somente a interface, configure `SGFS_MUNICIPAL_PUBLIC_KEY` e execute `node scripts/build-static.mjs`. A saída espera as rotas do gateway no mesmo endereço da interface.
 
 ## Ferramentas de ensaio
 
