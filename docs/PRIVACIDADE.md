@@ -16,6 +16,10 @@ O RH deve registrar somente o necessário para o controle do calendário. Observ
 
 A instituição deve definir finalidade/base legal, responsáveis, acessos, retenção, descarte, atendimento aos titulares e resposta a incidentes. O termo de ciência dos operadores e a validação jurídica/institucional permanecem nas [pendências](pendencias.md). Este documento não substitui essas decisões nem transfere responsabilidades legais.
 
+## Material acadêmico
+
+Use contas, profissionais e registros de ausência fictícios nas capturas, tabelas e demonstrações do TCC. Registre versão, cenário e resultado sem anexar dados do ambiente institucional. [Modelo de evidência](tcc/EVIDENCIAS.md)
+
 ## Segurança
 
 Chaves publicáveis e códigos CNES não são senhas. Segredos de servidor, credenciais das contas e sessões devem permanecer fora do código e dos relatos públicos. Consulte [SECURITY.md](../SECURITY.md).

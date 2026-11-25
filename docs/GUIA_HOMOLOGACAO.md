@@ -11,6 +11,8 @@ Registre versão/commit, data, ambiente, banco, equipamento, navegador e respons
 | Caso | Conferência esperada |
 | --- | --- |
 | Entrada | Início, login e simulação funcionam; nenhuma credencial gravada em evidências. |
+| Primeiro acesso | O aceite dos documentos vale para a sessão. A conta com senha provisória só avança após a troca. |
+| Redefinição de senha | A Administração redefine a senha da conta de teste e a sessão anterior perde o acesso. |
 | RH | Operador autorizado obrigatório; abas operacionais ocultas até a identificação. |
 | Isolamento | RH não lê ou altera outra unidade; Administração consulta as unidades autorizadas. |
 | CNES | Consulta sem gravação; diferenças conferidas antes de incorporar; resposta incompleta não apaga cadastros. |

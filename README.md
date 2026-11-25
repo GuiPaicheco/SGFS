@@ -26,6 +26,10 @@ Execute `node --test tests/*.test.mjs` e os [testes Python](docs/DESENVOLVIMENTO
 
 Baixe o [ZIP do SGFS](https://github.com/GuiPaicheco/SGFS/archive/refs/heads/main.zip) e siga o [guia de implantação no servidor](local/IMPLANTACAO.md). Para publicar a interface via Vercel, consulte [hospedagem](docs/HOSPEDAGEM.md).
 
+## Documentação e evolução
+
+O [índice da documentação](docs/README.md) reúne os guias atuais. A [linha do tempo](docs/tcc/LINHA_DO_TEMPO.md) acompanha o projeto desde o primeiro commit, e o [caderno do TCC](docs/tcc/README.md) registra decisões e evidências para a avaliação acadêmica.
+
 ## Licença
 
 Consulte [LICENSE](LICENSE) para as condições de uso.

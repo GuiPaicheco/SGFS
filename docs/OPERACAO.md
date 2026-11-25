@@ -16,7 +16,7 @@ A instituição deve definir quem guarda as credenciais das unidades, como subst
 
 Backups e restauração precisam de responsável, controle de acesso, retenção e ensaio em ambiente separado. Um snapshot de tabelas da aplicação não equivale a backup integral de Auth, Storage e configuração da plataforma.
 
-Não use `db reset`, scripts de limpeza ou fixtures em produção. Uma limpeza excepcional exige escopo explícito, cópia adequada e verificação posterior. O [registro de 23/10/2026](LIMPEZA_BASE_20261023.md) documenta uma ação já executada, não uma instrução para repeti-la.
+Não use `db reset`, scripts de limpeza ou fixtures em produção. Uma limpeza excepcional exige escopo explícito, cópia adequada e verificação posterior. O [registro de 23/10/2026](historico/LIMPEZA_BASE_20261023.md) documenta uma ação já executada, não uma instrução para repeti-la.
 
 ## Atualizações e incidentes
 

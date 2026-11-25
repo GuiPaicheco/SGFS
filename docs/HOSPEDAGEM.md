@@ -11,7 +11,7 @@ O projeto sgfsbetim publica o mesmo build da interface usada no servidor. A Verc
 - No projeto Vercel, configure `SGFS_GATEWAY_URL` com a URL HTTPS do gateway, incluindo o caminho e a barra final.
 - Configure `SGFS_MUNICIPAL_PUBLIC_KEY` com a chave pública `anon` gerada pelo gateway. Após iniciar o servidor, ela pode ser obtida no arquivo servido em `assets/sgfs-config.js`.
 - No servidor, adicione o domínio público da Vercel com barra final em `SGFS_RECOVERY_URLS` e reinicie o gateway. Isso autoriza o retorno de recuperação de senha ao endereço público.
-- Defina as duas variáveis na Vercel e gere um novo deploy. Sem as duas configurações, a página exibe manutenção e os fluxos dependentes do banco permanecem indisponíveis.
+- Defina as duas variáveis juntas na Vercel e gere um novo deploy. Com ambas vazias, a interface publica a página de manutenção. Se somente uma estiver definida, o build pede a configuração que falta.
 
 ## Conferência após publicação
 

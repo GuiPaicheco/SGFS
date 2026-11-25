@@ -22,3 +22,7 @@ Antes de desenvolver, leia [README.md](README.md), [arquitetura](docs/ARQUITETUR
 Explique problema, mudança, validação e limitações. Execute os testes pertinentes e o build. Mudanças de interface devem incluir conferência visual desktop/celular; alterações de banco precisam de ensaio isolado. Use capturas sem dados pessoais.
 
 Não inclua segredos, backups, documentos ou exports reais. Confira os arquivos preparados com `git diff --cached` e execute `node scripts/check-public-repository.mjs` antes do envio.
+
+## Manutenção da documentação
+
+Atualize o guia afetado quando mudar um procedimento de uso, teste ou implantação. Registre no changelog as mudanças percebidas por quem opera ou mantém o SGFS. Para mudanças de escopo, arquitetura ou avaliação, inclua a data, o commit e a evidência no [caderno do TCC](docs/tcc/README.md).

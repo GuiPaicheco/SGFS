@@ -1,32 +1,16 @@
 # Documentação do SGFS
 
-A documentação atual descreve o fluxo da Administração e do RH institucional. Documentos de etapas anteriores servem como histórico, não como instruções para operar ou implantar a versão atual.
+Use os guias desta pasta para trabalhar com a distribuição integrada ao PostgreSQL. Os registros de versões anteriores estão reunidos no [arquivo histórico](historico/README.md).
 
-## Comece por aqui
-
-| Objetivo | Documento |
+| O que fazer | Onde consultar |
 | --- | --- |
-| Entender o produto e executar a interface | [README principal](../README.md) |
-| Usar o RH e a Administração | [Manual de uso](MANUAL_USO.md) |
-| Conferir os procedimentos de lançamento | [Operações atuais](GUIA_OPERACOES_FINAIS.md) |
-| Desenvolver e testar sem afetar produção | [Desenvolvimento](DESENVOLVIMENTO.md) |
-| Entender os componentes e a autorização | [Arquitetura](ARQUITETURA.md) |
-| Implantar a distribuição PostgreSQL | [Implantação integrada](../local/IMPLANTACAO.md) |
-| Publicar e manter | [Publicação](PUBLICACAO.md), [Hospedagem](HOSPEDAGEM.md), [Operação](OPERACAO.md) |
-| Tratar evidências e dados pessoais | [Privacidade](PRIVACIDADE.md), [Segurança](../SECURITY.md) |
-| Validar o uso institucional | [Homologação](GUIA_HOMOLOGACAO.md) |
-| Planejar o trabalho restante | [Pendências](pendencias.md) |
+| Entender o projeto e começar | [README do repositório](../README.md) |
+| Usar a Administração ou o RH de uma unidade | [Manual de uso](MANUAL_USO.md) e [guia de operações](GUIA_OPERACOES_FINAIS.md) |
+| Conferir cadastro, calendário e regras | [Atualização CNES](ATUALIZACAO_CNES.md), [feriados](FERIADOS_UNIDADES.md) e [normas de férias](NORMAS_FERIAS_BETIM.md) |
+| Instalar e publicar | [Implantação PostgreSQL](../local/IMPLANTACAO.md), [hospedagem](HOSPEDAGEM.md) e [publicação](PUBLICACAO.md) |
+| Desenvolver, testar ou operar | [Arquitetura](ARQUITETURA.md), [desenvolvimento](DESENVOLVIMENTO.md) e [operação](OPERACAO.md) |
+| Homologar e tratar dados | [Roteiro de homologação](GUIA_HOMOLOGACAO.md), [privacidade](PRIVACIDADE.md) e [segurança](../SECURITY.md) |
+| Acompanhar a próxima entrega | [Pendências atuais](pendencias.md) e [changelog](../CHANGELOG.md) |
+| Acompanhar a evolução para o TCC | [Caderno do TCC](tcc/README.md), [linha do tempo](tcc/LINHA_DO_TEMPO.md) e [arquivo histórico](historico/README.md) |
 
-## Contratos de domínio
-
-- [Atualização CNES e operações RH](ATUALIZACAO_CNES.md)
-- [Feriados por unidade](FERIADOS_UNIDADES.md)
-- [Normas de férias de Betim e pontos de conferência](NORMAS_FERIAS_BETIM.md)
-
-## Registros históricos
-
-Os arquivos `VALIDACAO_*`, `REVISAO_*`, `HISTORICO_*`, análises datadas e materiais de treinamento anteriores registram o que foi observado na respectiva data. Podem conter nomes de telas, contagens e funcionalidades removidas. Não reaplicar scripts ou migrations a partir desses relatos.
-
-A [limpeza de 23/10/2026](LIMPEZA_BASE_20261023.md) substitui os estados de dados descritos nos ensaios anteriores. A [revisão visual SGFS](REVISAO_VISUAL_SGFS_20261023.md) registra a identidade atual.
-
-Evidências com dados reais, backups, credenciais e documentos administrativos devem ficar fora do repositório, mesmo quando o dado de origem é público.
+Para publicar uma evidência, use dados fictícios de uma instalação isolada. Consulte o [guia de privacidade](PRIVACIDADE.md).

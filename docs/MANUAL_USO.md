@@ -6,6 +6,8 @@ Diretoria IV de Atenção Primária à Saúde · Prefeitura Municipal de Betim.
 
 Na tela inicial, escolha **Entrar no SGFS**, selecione a unidade ou a Administração e informe sua senha. A simulação rápida funciona sem login e não cria registros.
 
+Leia os Termos de Uso e o Aviso de Privacidade quando a tela de aceite aparecer. Se a unidade recebeu uma senha provisória, escolha uma nova senha no primeiro acesso após o provisionamento ou a redefinição.
+
 No acesso RH, identifique o operador autorizado. As abas operacionais aparecem após a identificação. Se não houver profissionais autorizados, a Administração precisa incorporar o cadastro e conceder a autorização. Não compartilhe senhas em chamados ou issues.
 
 ## Administração
@@ -17,6 +19,8 @@ No acesso RH, identifique o operador autorizado. As abas operacionais aparecem a
 5. Cadastre os feriados/pontos facultativos com a abrangência aplicável.
 6. Consulte o calendário escolhendo unidade e período.
 
+Para redefinir uma senha de unidade, abra **Acesso da unidade** e selecione **Resetar senha**. Confirme uma senha provisória e combine a troca com a unidade. A redefinição encerra as sessões existentes daquela conta.
+
 Atualizar o CNES preserva os afastamentos existentes. Um profissional ausente na consulta não é removido automaticamente. Remoção do uso ativo e redefinição de acesso são ações separadas, que exigem atenção e confirmação.
 
 ## RH da unidade
@@ -27,11 +31,11 @@ Em **Férias e Cadastros**, encontre o profissional em ordem alfabética:
 - **Folga e Afastamento:** selecione dias de folga ou um período contínuo de afastamento. Informe o retorno quando conhecido e a referência administrativa.
 - **Cadastrar dayoff:** confirme dia e mês do aniversário conforme o procedimento institucional.
 
-Confira a prévia e o resultado antes de confirmar um lançamento. Não inclua diagnóstico, laudo ou detalhes de saúde nas observações. Os campos não substituem o processo administrativo.
+Na ficha do profissional, consulte também o histórico de registros. Confira a prévia e o resultado antes de confirmar um lançamento. Não inclua diagnóstico, laudo ou detalhes de saúde nas observações. Os campos não substituem o processo administrativo.
 
 ## Calendário
 
-Escolha mês ou intervalo, consulte e abra filtros adicionais quando necessário. Cargo, equipe e profissionais usam os dados cadastrados da unidade.
+Escolha mês ou intervalo, consulte e abra filtros adicionais quando necessário. Cargo, equipe e profissionais usam os dados cadastrados da unidade. Use o seletor para ajustar a quantidade de profissionais por página. No modo de lista completa, use **Carregar mais profissionais** quando a opção estiver disponível.
 
 Os critérios de conflito entre pessoas são combinados: mesmo cargo e mesma equipe, por exemplo, restringem a comparação a quem coincidir nos dois critérios. Esses conflitos de equipe são alertas; sobreposição de registros do mesmo vínculo possui validações próprias.
 

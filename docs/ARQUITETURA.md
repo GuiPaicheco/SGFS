@@ -18,6 +18,8 @@ Auth, PostgREST e as funções usam a base PostgreSQL do SGFS.
 
 O frontend é uma aplicação estática sem framework. `assets/app.js` coordena sessão, navegação e módulos especializados. O build versiona assets pelo conteúdo e publica apenas uma lista de arquivos. Bibliotecas locais de exportação são carregadas quando necessárias.
 
+A instalação integrada serve a interface e as rotas de backend pelo gateway. Para a publicação na Vercel, o build gera os mesmos arquivos do cliente e uma configuração separada com a chave pública do ambiente. As rotas de Auth, dados e CNES são encaminhadas ao gateway HTTPS quando configurado. [Hospedagem](HOSPEDAGEM.md)
+
 ## Acessos vigentes
 
 - **Público:** entrada e simulação sem persistir um lançamento.
@@ -27,6 +29,8 @@ O frontend é uma aplicação estática sem framework. `assets/app.js` coordena 
 A identidade declarada do operador é registrada junto das ações; uma conta compartilhada não equivale à autenticação individual desse profissional. Essa limitação exige política institucional de uso e evolução conforme as pendências.
 
 Esconder uma aba não é autorização. As funções de servidor revalidam usuário, papel, situação, contexto de unidade e operador conforme a operação. Cabeçalhos enviados pelo navegador não devem ser tratados isoladamente como prova de permissão.
+
+O gateway verifica o aceite da sessão e a exigência de trocar a senha provisória antes de liberar as operações. A autorização por papel, unidade e operador permanece nas funções de backend e no banco.
 
 ## Cadastros e lançamentos
 
