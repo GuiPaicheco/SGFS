@@ -24,7 +24,10 @@ end loop;end $$;
 select name||'='||digest from sgf_fingerprints order by name;
 select 'rls='||md5(coalesce(string_agg(schemaname||tablename||policyname||permissive||roles::text||cmd||coalesce(qual,'')||coalesce(with_check,''),'|' order by schemaname,tablename,policyname),'')) from pg_policies where schemaname in ('public','private');
 select 'functions='||md5(coalesce(string_agg(n.nspname||'.'||p.proname||pg_get_function_identity_arguments(p.oid)||pg_get_functiondef(p.oid)||pg_get_userbyid(p.proowner)||coalesce((select string_agg(a::text,',' order by a::text) from unnest(p.proacl) a),''),'|' order by n.nspname,p.proname,pg_get_function_identity_arguments(p.oid)),'')) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('public','private') and p.prokind in ('f','p');
-select 'tables='||md5(coalesce(string_agg(n.nspname||'.'||c.relname||c.relrowsecurity::text||c.relforcerowsecurity::text||pg_get_userbyid(c.relowner)||coalesce((select string_agg(a::text,',' order by a::text) from unnest(c.relacl) a),''),'|' order by n.nspname,c.relname),'')) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','private') and c.relkind in ('r','p');
+-- pg_dump pode restaurar um ACL padrão como NULL sem alterar os privilégios.
+select 'table:'||n.nspname||'.'||c.relname||'='||md5(c.relrowsecurity::text||c.relforcerowsecurity::text||pg_get_userbyid(c.relowner)||
+ coalesce((select string_agg(a::text,',' order by a::text) from unnest(coalesce(c.relacl,acldefault('r',c.relowner))) a),''))
+from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','private') and c.relkind in ('r','p') order by n.nspname,c.relname;
 select 'constraints='||md5(coalesce(string_agg(n.nspname||'.'||c.relname||k.conname||pg_get_constraintdef(k.oid),'|' order by n.nspname,c.relname,k.conname),'')) from pg_constraint k join pg_class c on c.oid=k.conrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','private');
 select 'constraint:'||n.nspname||'.'||c.relname||'.'||k.conname||'='||md5(pg_get_constraintdef(k.oid)) from pg_constraint k join pg_class c on c.oid=k.conrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','private') order by n.nspname,c.relname,k.conname;
 select 'triggers='||md5(coalesce(string_agg(n.nspname||'.'||c.relname||t.tgname||pg_get_triggerdef(t.oid)||t.tgenabled::text,'|' order by n.nspname,c.relname,t.tgname),'')) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','private') and not t.tgisinternal;
@@ -46,7 +49,7 @@ if(after!==before){
  const entries=value=>new Map(value.split('\n').filter(line=>line.includes('=')).map(line=>{const at=line.indexOf('=');return [line.slice(0,at),line.slice(at+1)];}));
  const a=entries(after),b=entries(before);
  console.error(JSON.stringify({differences:[...new Set([...a.keys(),...b.keys()])].filter(key=>a.get(key)!==b.get(key)).map(key=>({key,before:b.get(key),after:a.get(key)}))}));
+ throw Error('Dados, privilégios, RLS ou funções divergem após restauração.');
 }
-assert.equal(after,before,'Dados, RLS ou funções divergem após restauração.');
 console.log('PASS: cadeia integral aplicada em banco vazio; demonstração restaurada em banco novo, com dados/RLS/funções iguais.');
 // O runner e seu container são descartáveis. Não exportar dump/credenciais como artifacts.
