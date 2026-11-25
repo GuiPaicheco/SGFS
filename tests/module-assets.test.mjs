@@ -11,3 +11,10 @@ test('dependências públicas não podem escapar de assets ou formar ciclo',asyn
  await assert.rejects(()=>versionModuleAsset('assets/main.js',()=>Promise.resolve("import './folder/../../secret.mjs';")),/fora/);
  await assert.rejects(()=>versionModuleAsset('assets/main.js',()=>Promise.resolve("import './main.js';")),/circular/);
 });
+
+test('assets próprios geram os mesmos bytes em checkouts Windows e Linux',async()=>{
+ const asset=name=>versionModuleAsset('assets/'+name,()=>Promise.resolve(Buffer.from('primeira\r\nsegunda\r\n')));
+ assert.equal(await asset('app.js'),'primeira\nsegunda\n');
+ assert.equal(await asset('app.css'),'primeira\nsegunda\n');
+ assert.deepEqual(await asset('vendor/sdk.js'),Buffer.from('primeira\r\nsegunda\r\n'));
+});

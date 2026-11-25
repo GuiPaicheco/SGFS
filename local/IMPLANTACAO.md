@@ -10,6 +10,8 @@ Baixe o ZIP pelo GitHub e extraia-o no servidor. Use Node.js 24 e Python 3.14. P
 2. Instale as dependências Python com `python -m pip install -r requirements.txt` no ambiente apontado por `SGFS_PYTHON_EXE`.
 3. Na raiz da pasta extraída, execute `node --env-file=.env local/integrado.mjs`. Em produção, use esse comando com um gerenciador de serviços.
 
+Se houver outra instância no mesmo servidor, configure `SGFS_PORT` e `SGFS_INTERNAL_PORT_BASE` com intervalos livres. Se usar `SGFS_SITE_URL`, mantenha-a alinhada ao endereço público da instância.
+
 O ZIP inclui a interface, as funções, as migrações e o SDK Supabase para navegador. O servidor gera a configuração da interface com a chave pública do próprio ambiente.
 
 ## Ensaio Windows com ambiente provisionado

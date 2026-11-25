@@ -28,10 +28,15 @@ const functions = [
   'manage-operations', 'manage-profiles', 'manage-inclusions', 'submit-request',
   'employee-auth', 'management-auth', 'provisional-login',
 ];
-const authPort = 18991;
-const restPort = 18992;
-const cnesPort = 18993;
-const edgePort = 19000;
+const authPort = Number(process.env.SGFS_INTERNAL_PORT_BASE ?? 18991);
+if (!Number.isInteger(authPort) || authPort < 1024 || authPort + 35 > 65535 || (port >= authPort && port <= authPort + 35)) {
+  throw Error('SGFS_INTERNAL_PORT_BASE deve apontar para um intervalo de portas internas separado de SGFS_PORT.');
+}
+const restPort = authPort + 1;
+const cnesPort = authPort + 2;
+const edgePort = authPort + 9;
+const smtpPort = authPort + 34;
+const mailpitPort = authPort + 35;
 const processes = [];
 const required = name => {
   const value = process.env[name];
@@ -180,7 +185,7 @@ for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => stop(0));
 server.on('error', () => stop(1));
 
 if (captureMail) {
-  start('SMTP local', captureMail, ['--listen', '127.0.0.1:19026', '--smtp', '127.0.0.1:19025'], { MP_DISABLE_VERSION_CHECK: 'true' });
+  start('SMTP local', captureMail, ['--listen', '127.0.0.1:' + mailpitPort, '--smtp', '127.0.0.1:' + smtpPort], { MP_DISABLE_VERSION_CHECK: 'true' });
 }
 start('Auth', authExe, [], {
   GOTRUE_API_HOST: '127.0.0.1', GOTRUE_API_PORT: String(authPort),
@@ -197,7 +202,7 @@ start('Auth', authExe, [], {
   GOTRUE_MAILER_URLPATHS_CONFIRMATION: base + 'backend/auth/v1/verify',
   GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: base + 'backend/auth/v1/verify',
   ...(smtpHost ? {
-    GOTRUE_SMTP_HOST: smtpHost, GOTRUE_SMTP_PORT: captureMail ? '19025' : (process.env.SGFS_SMTP_PORT ?? '587'),
+    GOTRUE_SMTP_HOST: smtpHost, GOTRUE_SMTP_PORT: captureMail ? String(smtpPort) : (process.env.SGFS_SMTP_PORT ?? '587'),
     GOTRUE_SMTP_USER: process.env.SGFS_SMTP_USER ?? '', GOTRUE_SMTP_PASS: process.env.SGFS_SMTP_PASSWORD ?? '',
     GOTRUE_SMTP_ADMIN_EMAIL: captureMail ? 'sgfs-local@invalid.test' : required('SGFS_SMTP_FROM'),
   } : {}),
@@ -242,7 +247,7 @@ try {
     waitForService('PostgREST', restPort, '/calendar_events?select=id&limit=0', [200]),
     waitForService('CNES', cnesPort, '/api/cnes?cnes=2126486', [401]),
     waitForService('Funções', edgePort, '/access-auth', [405]),
-    ...(captureMail ? [waitForService('SMTP local', 19026, '/', [200])] : []),
+    ...(captureMail ? [waitForService('SMTP local', mailpitPort, '/', [200])] : []),
   ]);
   server.listen(port, '127.0.0.1', () => console.log('SGFS integrado em ' + local.origin + base));
 } catch (error) {

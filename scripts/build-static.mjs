@@ -27,7 +27,7 @@ await mkdir(path.join(output, 'assets'), { recursive: true });
 for (const name of ['logo.png']) {
   await copyFile(path.join(root, name), path.join(output, name));
 }
-const html = await readFile(path.join(root, 'index.html'), 'utf8');
+const html = (await readFile(path.join(root, 'index.html'), 'utf8')).replace(/\r\n/g, '\n');
 const moduleCache = new Map();
 async function readPublicAsset(file) {
   if (file === 'assets/sgfs-config.js') return clientConfig;
