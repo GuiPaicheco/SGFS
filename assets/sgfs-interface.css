@@ -177,7 +177,8 @@
   .table-wrap:has([data-unit-open]) td,.table-wrap:has([data-unit-open]) th { display:block; padding:0; border:0; background:transparent; white-space:normal; }
   .table-wrap:has([data-unit-open]) td:nth-child(2) { margin:.35rem 0 .8rem; color:var(--muted); font-size:.8rem; }
   .table-wrap:has([data-unit-open]) td:nth-child(2)::before { content:'CNES '; }
-  .unit-table-actions .button { flex:1 1 auto; padding-inline:.65rem; }
+  .unit-table-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; }
+  .unit-table-actions .button { width:100%; padding-inline:.4rem; font-size:.82rem; }
   .footer-copy { font-size:.67rem; }
   .site-footer { padding:1rem; }
 }
