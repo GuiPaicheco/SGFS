@@ -28,7 +28,15 @@ await mkdir(path.join(output, 'assets'), { recursive: true });
 for (const name of ['logo.png']) {
   await copyFile(path.join(root, name), path.join(output, name));
 }
-const html = (await readFile(path.join(root, 'index.html'), 'utf8')).replace(/\r\n/g, '\n');
+const environmentNotice = process.argv.includes('--homologacao')
+  ? `<aside class="environment-notice" aria-label="Aviso de ambiente">
+    <strong>Ambiente de homologação.</strong>
+    Os dados deste ambiente não serão salvos no sistema oficial.
+    O novo endereço é <a href="http://tecnologia/SGFS/">http://tecnologia/SGFS/</a>.
+  </aside>`
+  : '';
+const html = (await readFile(path.join(root, 'index.html'), 'utf8')).replace(/\r\n/g, '\n')
+  .replace('<!-- sgfs-environment-notice -->', environmentNotice);
 const moduleCache = new Map();
 async function readPublicAsset(file) {
   if (file === 'assets/sgfs-config.js') return clientConfig;

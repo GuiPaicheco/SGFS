@@ -75,6 +75,28 @@ textarea {
 .skip-link:focus {
   top: 1rem;
 }
+.environment-notice {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid #dec16f;
+  background: var(--warning-bg);
+  color: #472e00;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.environment-notice a {
+  color: inherit;
+  font-weight: 650;
+  text-underline-offset: 0.15em;
+  overflow-wrap: anywhere;
+}
+@media print {
+  .environment-notice { display: none; }
+}
 .site-header {
   background: linear-gradient(115deg, var(--green-950), var(--green-800));
   color: #fff;

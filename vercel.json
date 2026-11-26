@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "",
-  "buildCommand": "node scripts/build-static.mjs",
+  "buildCommand": "node scripts/build-static.mjs --homologacao",
   "outputDirectory": "dist-municipal",
   "functions": {
     "api/cnes.py": {
