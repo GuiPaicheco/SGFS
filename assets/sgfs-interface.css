@@ -118,9 +118,9 @@
   .cnes-section { background:#fafcf9; }
   .cnes-data-field { background:#f2f6f1; }
   .site-footer { width:100%; max-width:none; margin:0; border-top:1px solid #dce5dc; background:#f8faf7; padding:1.15rem 1.5rem; }
-  .footer-inner { width:100%; max-width:1392px; margin:auto; display:flex; align-items:center; justify-content:center; gap:1rem; }
+  .footer-inner { width:100%; max-width:1392px; margin:auto; display:flex; flex-direction:column; align-items:center; gap:.5rem; }
   .footer-mark { color:#396148; font-size:.9rem; font-weight:800; letter-spacing:.06em; padding-right:1rem; border-right:1px solid #cedbcf; }
-  .footer-copy { display:grid; gap:.15rem; text-align:left; font-size:.72rem; line-height:1.5; color:#647368; }
+  .footer-copy { display:grid; gap:.15rem; text-align:center; font-size:.72rem; line-height:1.5; color:#647368; }
   .footer-copy strong { color:#395b43; font-weight:650; }
 }
 @media screen and (max-width:1000px) {
@@ -177,7 +177,7 @@
   .table-wrap:has([data-unit-open]) td,.table-wrap:has([data-unit-open]) th { display:block; padding:0; border:0; background:transparent; white-space:normal; }
   .table-wrap:has([data-unit-open]) td:nth-child(2) { margin:.35rem 0 .8rem; color:var(--muted); font-size:.8rem; }
   .table-wrap:has([data-unit-open]) td:nth-child(2)::before { content:'CNES '; }
-  .table-wrap [data-unit-open] { width:100%; }
+  .unit-table-actions .button { flex:1 1 auto; padding-inline:.65rem; }
   .footer-copy { font-size:.67rem; }
   .site-footer { padding:1rem; }
 }
@@ -209,6 +209,8 @@
 
 .sgfs-info-dialog {color:var(--text,#163327);width:min(92vw,42rem);max-height:85vh;overflow:auto;border:1px solid #b5cdc0;border-radius:14px;padding:clamp(1rem,4vw,2rem);}
 .sgfs-info-dialog::backdrop {background:rgba(11,39,31,.62);}
+.unit-table-actions { margin-top:0; }
+#unit-reset-form .field + .field { margin-top:.75rem; }
 .sgfs-info-dialog details {margin-block:.75rem;}
 .sgfs-info-dialog .actions {margin-top:1rem;}
 .sgfs-footer-links {display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;padding:.75rem;}

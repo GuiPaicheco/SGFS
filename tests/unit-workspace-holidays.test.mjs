@@ -7,9 +7,12 @@ test('login lista exatamente 42 estabelecimentos sem expor senhas e mantém admi
  const root={};runInNewContext(read('assets/unit-login.js'),{globalThis:root});const api=root.SGFUnitLogin,html=api.options(esc);
  assert.equal(api.units.length,42);assert.equal(new Set(api.units.map(x=>x.cnes)).size,42);assert.equal((html.match(/CNES /g)||[]).length,42);assert.match(html,/value="admin"/);assert.doesNotMatch(html,/123456|0123456789|password/);
 });
-test('unidades mostram só Acessar CNES na lista e ficha/dados/dayoff dentro, sem PDF',async()=>{
- const h=harness('assets/rh-units-ui.js');await h.root.SGFRhUnits.mount({app:h.app,esc,isCurrent:()=>true,request:async()=>({units:[{cnes:'6305245',login:'UBS TESTE'}]}),cnesRequest:async()=>({}),collect:async()=>({})});
- assert.match(h.app.innerHTML,/Acessar CNES/);assert.doesNotMatch(h.app.innerHTML,/Redefinir senha|>Atualizar CNES<|Ver CNES|unit-pdf/);
+test('unidades mostram os acessos ao CNES e reset na lista e os dados na ficha',async()=>{
+ const h=harness('assets/rh-units-ui.js');await h.root.SGFRhUnits.mount({app:h.app,esc,isCurrent:()=>true,request:async()=>({units:[{cnes:'6305245',login:'UBS TESTE',unit_id:'u',account:{profile_id:'rh'}},{cnes:'6305246',login:'UBS PENDENTE'}]}),cnesRequest:async()=>({}),collect:async()=>({})});
+ assert.match(h.app.innerHTML,/data-unit-open="6305245"[^>]*>Acessar CNES<\/button><button[^>]*data-unit-reset="6305245"[^>]*>Resetar Senha/);
+ assert.match(h.app.innerHTML,/data-unit-reset="6305246" disabled/);
+ assert.match(h.app.innerHTML,/<dialog id="unit-reset-dialog"/);
+ assert.doesNotMatch(h.app.innerHTML,/>Atualizar CNES<|Ver CNES|unit-pdf/);
  const calls=[];await h.root.SGFRhUnits.mount({app:h.app,esc,isCurrent:()=>true,initialUnit:'6305245',request:async()=>({units:[{cnes:'6305245',login:'UBS TESTE'}]}),collect:async()=>({}),cnesRequest:async p=>{calls.push(p.action);return p.action==='list'?{total:1,entries:[{id:'e',source_data:{fullName:'<script>TESTE',occupation:'Cargo',cns:'1',cbo:'2'},local_data:{}}]}:{dayoffs:[{entry_id:'e',birthday_day:7,birthday_month:6}]};}});
  assert.match(h.app.innerHTML,/Estabelecimento completo/);assert.match(h.app.innerHTML,/07\/06/);assert.match(h.app.innerHTML,/Todos os dados incorporados/);assert.doesNotMatch(h.app.innerHTML,/<script>|unit-pdf|Atualizar por arquivo/);assert.deepEqual(calls.sort(),['list','view-source']);
 });
