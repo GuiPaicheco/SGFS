@@ -7,7 +7,8 @@ import path from 'node:path';
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const outputName = 'dist-municipal';
 const output = path.join(root, outputName);
-const offline = process.argv.includes('--without-backend');
+const offline = process.argv.includes('--without-backend')
+  || (process.env.VERCEL_ENV === 'preview' && !process.env.SGFS_MUNICIPAL_PUBLIC_KEY);
 const publicKey = offline ? '' : process.env.SGFS_MUNICIPAL_PUBLIC_KEY ?? '';
 const sdkFile = process.env.SGFS_BROWSER_SDK_FILE || path.join(root, 'assets/vendor/supabase.min.js');
 function isPublishableKey(key) {

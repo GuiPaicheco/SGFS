@@ -201,9 +201,33 @@ BEGIN
 END
 $body$;
 
-GRANT USAGE ON SCHEMA auth,extensions TO service_role;
-GRANT SELECT (id,encrypted_password), UPDATE (encrypted_password,updated_at) ON auth.users TO service_role;
-GRANT SELECT (id,user_id,not_after), DELETE ON auth.sessions TO service_role;
+-- O Auth hospedado não delega as tabelas de credenciais ao service_role.
+-- A operação privada mantém a atualização de senha e sessões na transação do SGFS.
+CREATE FUNCTION private.sgfs_set_institutional_auth_password(account_id uuid, new_password text, keep_session uuid DEFAULT NULL)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $body$
+DECLARE old_hash text;
+BEGIN
+ IF (SELECT auth.jwt()->>'role') IS DISTINCT FROM 'service_role' OR NOT EXISTS (
+  SELECT 1 FROM private.rh_unit_accounts a JOIN public.profiles p ON p.id=a.profile_id
+  WHERE p.id=account_id AND p.institutional_cnes_unit_id=a.cnes_unit_id
+ ) THEN RAISE EXCEPTION 'RH_NOT_ALLOWED'; END IF;
+ IF new_password IS NULL OR length(new_password)<8 OR octet_length(new_password)>72 OR new_password='123456' THEN RAISE EXCEPTION 'RH_PASSWORD_INVALID'; END IF;
+ IF keep_session IS NOT NULL THEN
+  IF NOT EXISTS (SELECT 1 FROM auth.sessions s WHERE s.id=keep_session AND s.user_id=account_id AND (s.not_after IS NULL OR s.not_after>now())) THEN
+   RAISE EXCEPTION 'RH_NOT_ALLOWED';
+  END IF;
+  SELECT encrypted_password INTO old_hash FROM auth.users WHERE id=account_id;
+  IF old_hash IS NULL OR extensions.crypt(new_password,old_hash)=old_hash THEN RAISE EXCEPTION 'RH_PASSWORD_SAME'; END IF;
+ END IF;
+ UPDATE auth.users SET encrypted_password=extensions.crypt(new_password,extensions.gen_salt('bf',10)),updated_at=now() WHERE id=account_id;
+ IF NOT FOUND THEN RAISE EXCEPTION 'RH_UNIT_INVALID'; END IF;
+ IF keep_session IS NOT NULL THEN
+  DELETE FROM auth.sessions WHERE user_id=account_id AND id<>keep_session;
+ END IF;
+END
+$body$;
+REVOKE ALL ON FUNCTION private.sgfs_set_institutional_auth_password(uuid,text,uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION private.sgfs_set_institutional_auth_password(uuid,text,uuid) TO service_role;
 
 CREATE FUNCTION public.rh_reset_provisional_password(actor_id uuid,target_cnes uuid,initial_password text)
 RETURNS void LANGUAGE plpgsql SET search_path='' AS $body$
@@ -216,8 +240,7 @@ BEGIN
  SELECT a.profile_id INTO account FROM private.rh_unit_accounts a JOIN public.profiles p ON p.id=a.profile_id
   WHERE a.cnes_unit_id=target_cnes AND p.institutional_cnes_unit_id=target_cnes FOR UPDATE OF a,p;
  IF account IS NULL THEN RAISE EXCEPTION 'RH_UNIT_INVALID'; END IF;
- UPDATE auth.users SET encrypted_password=extensions.crypt(initial_password,extensions.gen_salt('bf',10)),updated_at=now() WHERE id=account;
- IF NOT FOUND THEN RAISE EXCEPTION 'RH_UNIT_INVALID'; END IF;
+ PERFORM private.sgfs_set_institutional_auth_password(account,initial_password);
  UPDATE public.profiles SET must_change_password=true WHERE id=account;
  PERFORM private.rh_revoke_auth_sessions(actor_id,target_cnes);
  INSERT INTO public.audit_events(actor_id,actor_role,action,entity_type,entity_id,context_cnes_unit_id)
@@ -229,22 +252,18 @@ GRANT EXECUTE ON FUNCTION public.rh_reset_provisional_password(uuid,uuid,text) T
 
 CREATE FUNCTION public.rh_complete_provisional_password(actor_id uuid,session_id uuid,new_password text)
 RETURNS void LANGUAGE plpgsql SET search_path='' AS $body$
-DECLARE unit_id uuid; old_hash text;
+DECLARE unit_id uuid;
 BEGIN
  IF (SELECT auth.jwt()->>'role') IS DISTINCT FROM 'service_role' THEN RAISE EXCEPTION 'RH_NOT_ALLOWED'; END IF;
  IF new_password IS NULL OR length(new_password)<8 OR octet_length(new_password)>72 OR new_password='123456' THEN RAISE EXCEPTION 'RH_PASSWORD_INVALID'; END IF;
  SELECT institutional_cnes_unit_id INTO unit_id FROM public.profiles WHERE id=actor_id;
  IF unit_id IS NULL THEN RAISE EXCEPTION 'RH_NOT_ALLOWED'; END IF;
  PERFORM pg_advisory_xact_lock(hashtextextended('sgfs-password:'||unit_id::text,0));
- IF NOT EXISTS (SELECT 1 FROM auth.sessions s WHERE s.id=session_id AND s.user_id=actor_id AND (s.not_after IS NULL OR s.not_after>now()))
-  OR NOT EXISTS (SELECT 1 FROM public.profiles p JOIN private.rh_unit_accounts a ON a.profile_id=p.id AND a.cnes_unit_id=p.institutional_cnes_unit_id
+ IF session_id IS NULL OR NOT EXISTS (SELECT 1 FROM public.profiles p JOIN private.rh_unit_accounts a ON a.profile_id=p.id AND a.cnes_unit_id=p.institutional_cnes_unit_id
    WHERE p.id=actor_id AND p.institutional_cnes_unit_id=unit_id AND p.disabled_at IS NULL AND p.must_change_password AND a.enabled)
  THEN RAISE EXCEPTION 'RH_NOT_ALLOWED'; END IF;
- SELECT encrypted_password INTO old_hash FROM auth.users WHERE id=actor_id;
- IF old_hash IS NULL OR extensions.crypt(new_password,old_hash)=old_hash THEN RAISE EXCEPTION 'RH_PASSWORD_SAME'; END IF;
- UPDATE auth.users SET encrypted_password=extensions.crypt(new_password,extensions.gen_salt('bf',10)),updated_at=now() WHERE id=actor_id;
+ PERFORM private.sgfs_set_institutional_auth_password(actor_id,new_password,session_id);
  UPDATE public.profiles SET must_change_password=false WHERE id=actor_id;
- DELETE FROM auth.sessions WHERE user_id=actor_id AND id<>session_id;
  INSERT INTO public.audit_events(actor_id,actor_role,action,entity_type,entity_id,context_cnes_unit_id)
  VALUES(actor_id,'rh','rh_provisional_password_changed','profile',actor_id,unit_id);
 END

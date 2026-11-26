@@ -2,5 +2,70 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "",
-  "buildCommand": "node scripts/build-vercel.mjs"
+  "buildCommand": "node scripts/build-static.mjs",
+  "outputDirectory": "dist-municipal",
+  "functions": {
+    "api/cnes.py": {
+      "maxDuration": 150,
+      "includeFiles": "{cnes_service/**,config/rh-units.json}"
+    }
+  },
+  "redirects": [
+    {
+      "source": "/SGFS",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/backend/auth/v1/:path*",
+      "destination": "https://ijhvbzomakbbxverqfqh.supabase.co/auth/v1/:path*"
+    },
+    {
+      "source": "/backend/rest/v1/:path*",
+      "destination": "https://ijhvbzomakbbxverqfqh.supabase.co/rest/v1/:path*"
+    },
+    {
+      "source": "/backend/functions/v1/:path*",
+      "destination": "https://ijhvbzomakbbxverqfqh.supabase.co/functions/v1/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/backend/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        }
+      ]
+    },
+    {
+      "source": "/assets/sgfs-config.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ]
 }

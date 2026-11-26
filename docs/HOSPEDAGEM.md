@@ -6,12 +6,12 @@ Baixe o ZIP do GitHub, extraia no servidor e siga o [guia de implantação](../l
 
 ## Vercel
 
-O projeto sgfsbetim publica o mesmo build da interface usada no servidor. A Vercel encaminha sessões, dados e CNES para o gateway SGFS. PostgreSQL, Auth, PostgREST e Deno executam no servidor descrito no guia. O deploy da interface não provisiona contas.
+O projeto [sgfsbetim](https://sgfsbetim.vercel.app/) usa temporariamente o Supabase GeraFerias para Auth, PostgreSQL e Edge Functions. A Vercel encaminha as rotas `/backend/` ao projeto e executa a API CNES em `/api/cnes`. O endereço anterior redireciona para o novo.
 
-- No projeto Vercel, configure `SGFS_GATEWAY_URL` com a URL HTTPS do gateway, incluindo o caminho e a barra final.
-- Configure `SGFS_MUNICIPAL_PUBLIC_KEY` com a chave pública `anon` gerada pelo gateway. Após iniciar o servidor, ela pode ser obtida no arquivo servido em `assets/sgfs-config.js`.
-- No servidor, adicione o domínio público da Vercel com barra final em `SGFS_RECOVERY_URLS` e reinicie o gateway. Isso autoriza o retorno de recuperação de senha ao endereço público.
-- Defina as duas variáveis juntas na Vercel e gere um novo deploy. Com ambas vazias, a interface publica a página de manutenção. Se somente uma estiver definida, o build pede a configuração que falta.
+- Configure `SGFS_MUNICIPAL_PUBLIC_KEY` com a chave publicável do projeto Supabase.
+- Configure `SUPABASE_URL` para a API CNES. Ao trocar de projeto, atualize também os destinos de `rewrites` em `vercel.json`.
+- Para habilitar a recuperação de senha, inclua o endereço público na lista de redirecionamentos do Supabase Auth.
+- As prévias sem chave publicável exibem a página de manutenção. Configure uma chave de prévia apenas para a branch que será validada.
 
 ## Conferência após publicação
 
