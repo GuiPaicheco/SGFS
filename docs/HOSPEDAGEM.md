@@ -6,7 +6,7 @@ Baixe o ZIP do GitHub, extraia no servidor e siga o [guia de implantação](../l
 
 ## Vercel
 
-O projeto [sgfsbetim](https://sgfsbetim.vercel.app/) usa temporariamente o Supabase GeraFerias para Auth, PostgreSQL e Edge Functions. A Vercel encaminha as rotas `/backend/` ao projeto e executa a API CNES em `/api/cnes`. O endereço anterior redireciona para o novo.
+O projeto [sgfsbetim](https://sgfsbetim.vercel.app/) usa temporariamente o Supabase GeraFerias para Auth, PostgreSQL e Edge Functions. A Vercel encaminha as rotas `/backend/` ao projeto e executa a API CNES em `/api/cnes`. O endereço anterior redireciona para o novo. O Supabase gerencia as contas.
 
 - Configure `SGFS_MUNICIPAL_PUBLIC_KEY` com a chave publicável do projeto Supabase.
 - Configure `SUPABASE_URL` para a API CNES. Ao trocar de projeto, atualize também os destinos de `rewrites` em `vercel.json`.

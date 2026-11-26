@@ -50,5 +50,5 @@ test('aceite nominal e homologação normativa não são substituídos por teste
   assert.match(guide, /Caso não executado nunca conta como aprovado/);
   assert.match(guide, /Não assinar automaticamente/);
   assert.match(guide, /Nenhum descarte foi autorizado/);
-  assert.match(read('docs/HOSPEDAGEM.md'), /não provisiona contas/);
+  assert.match(read('docs/HOSPEDAGEM.md'), /O Supabase gerencia as contas/);
 });
